@@ -18,7 +18,7 @@ TOKEN = "8752641180:AAET94FACuNdO26CCdFHFyv1vJhSiv3O7F4"
 WEBAPP_URL = "https://casino-bot-y2qo.onrender.com/webapp"
 
 SUPABASE_URL = "https://lnskcqunuaewqcsvcpvr.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2tjcXVudWFld3Fjc3ZjcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzE2MjQsImV4cCI6MjEwODYwNzYyNH0.g0F_E6hIOeholtABi_WsbMzqT4H-49wTH5XYXAk_0Nc"
+SUPABASE_KEY = "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2tjcXVudWFld3Fjc3ZjcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzE2MjQsImV4cCI6MjEwODYwNzYyNH0.g0F_E6hIOeholtABi_WsbMzqT4H-49wTH5XYXAk_0Nc"
 
 WEBAPP_HTML = f"""
 <!DOCTYPE html>
@@ -32,23 +32,23 @@ WEBAPP_HTML = f"""
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {{
-            --bg-color: #0b0d17;
-            --card-bg: #141829;
-            --card-hover: #1e243d;
-            --accent-gold: #ffd700;
-            --accent-gold-glow: rgba(255, 215, 0, 0.4);
-            --accent-red: #ff3838;
-            --accent-green: #05c46b;
+            --bg-color: #070913;
+            --card-bg: #111526;
+            --card-hover: #1a2038;
+            --accent-gold: #fbc531;
+            --accent-gold-glow: rgba(251, 197, 49, 0.4);
+            --accent-red: #e84118;
+            --accent-green: #4cd137;
             --text-main: #ffffff;
-            --text-dim: #808e9b;
-            --border-color: rgba(255, 255, 255, 0.1);
+            --text-dim: #718093;
+            --border-color: rgba(255, 255, 255, 0.08);
         }}
         * {{ box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }}
-        body {{ background-color: var(--bg-color); color: var(--text-main); font-family: 'Outfit', sans-serif; margin: 0; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; background-image: radial-gradient(circle at top, #1a1f38 0%, #0b0d17 100%); }}
+        body {{ background-color: var(--bg-color); color: var(--text-main); font-family: 'Outfit', sans-serif; margin: 0; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; background-image: radial-gradient(circle at top, #161b33 0%, #070913 100%); }}
 
-        .header {{ width: 100%; max-width: 440px; display: flex; justify-content: space-between; align-items: center; background: rgba(20, 24, 41, 0.8); padding: 14px 20px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); margin-bottom: 20px; backdrop-filter: blur(12px); }}
+        .header {{ width: 100%; max-width: 440px; display: flex; justify-content: space-between; align-items: center; background: rgba(17, 21, 38, 0.85); padding: 14px 20px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.6); margin-bottom: 20px; backdrop-filter: blur(12px); }}
         .logo {{ font-weight: 800; font-size: 19px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 15px var(--accent-gold-glow); }}
-        .balance-box {{ background: rgba(5, 196, 107, 0.12); border: 1px solid rgba(5, 196, 107, 0.4); padding: 8px 16px; border-radius: 14px; font-weight: 700; color: var(--accent-green); font-size: 15px; box-shadow: 0 0 15px rgba(5, 196, 107, 0.2); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }}
+        .balance-box {{ background: rgba(76, 209, 55, 0.12); border: 1px solid rgba(76, 209, 55, 0.35); padding: 8px 16px; border-radius: 14px; font-weight: 700; color: var(--accent-green); font-size: 15px; box-shadow: 0 0 15px rgba(76,209,55,0.15); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }}
         .balance-box.pulse {{ transform: scale(1.15); }}
 
         .container {{ width: 100%; max-width: 440px; }}
@@ -56,13 +56,13 @@ WEBAPP_HTML = f"""
         .back-btn:active {{ transform: scale(0.95); background: var(--card-hover); }}
 
         .lobby-grid {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; animation: fadeIn 0.4s ease; }}
-        .game-card {{ background: linear-gradient(145deg, #141829, #0f1220); border-radius: 22px; padding: 20px 14px; text-align: center; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }}
+        .game-card {{ background: linear-gradient(145deg, #13182e, #0c1020); border-radius: 22px; padding: 20px 14px; text-align: center; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }}
         .game-card:hover, .game-card:active {{ transform: translateY(-6px); border-color: var(--accent-gold); box-shadow: 0 12px 30px var(--accent-gold-glow); }}
-        .game-icon {{ font-size: 38px; margin-bottom: 8px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }}
+        .game-icon {{ font-size: 40px; margin-bottom: 10px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }}
         .game-title {{ font-size: 15px; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.5px; }}
         .game-desc {{ font-size: 11px; color: var(--text-dim); }}
 
-        .game-screen {{ display: none; background: var(--card-bg); border-radius: 24px; padding: 24px 20px; border: 1px solid var(--border-color); box-shadow: 0 20px 50px rgba(0,0,0,0.7); text-align: center; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }}
+        .game-screen {{ display: none; background: var(--card-bg); border-radius: 24px; padding: 24px 20px; border: 1px solid var(--border-color); box-shadow: 0 20px 50px rgba(0,0,0,0.8); text-align: center; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }}
         .game-screen.active {{ display: block; }}
 
         @keyframes fadeIn {{ from {{ opacity: 0; transform: scale(0.95); }} to {{ opacity: 1; transform: scale(1); }} }}
@@ -72,52 +72,27 @@ WEBAPP_HTML = f"""
         .bet-control label {{ font-size: 13px; color: var(--text-dim); font-weight: 600; }}
         .bet-input {{ width: 90px; background: transparent; border: none; color: var(--accent-gold); font-weight: 800; font-size: 18px; text-align: center; outline: none; }}
 
-        .action-btn {{ background: linear-gradient(135deg, #ffd700, #ff793f); color: #000; border: none; width: 100%; padding: 16px; font-size: 16px; font-weight: 800; border-radius: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3); text-transform: uppercase; letter-spacing: 1px; }}
+        .action-btn {{ background: linear-gradient(135deg, #fbc531, #e1b12c); color: #000; border: none; width: 100%; padding: 16px; font-size: 16px; font-weight: 800; border-radius: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 20px rgba(251, 197, 49, 0.35); text-transform: uppercase; letter-spacing: 1px; }}
         .action-btn:active {{ transform: scale(0.97); opacity: 0.9; }}
 
         .result-box {{ margin-top: 16px; font-weight: 700; min-height: 28px; font-size: 16px; transition: all 0.3s ease; }}
         .flex-btns {{ display: flex; gap: 8px; margin-bottom: 14px; }}
         .flex-btns button {{ flex: 1; padding: 12px 8px; background: var(--card-hover); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; }}
-        .flex-btns button.selected {{ border-color: var(--accent-gold); background: rgba(255, 215, 0, 0.15); color: var(--accent-gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }}
+        .flex-btns button.selected {{ border-color: var(--accent-gold); background: rgba(251, 197, 49, 0.15); color: var(--accent-gold); box-shadow: 0 0 10px rgba(251, 197, 49, 0.2); }}
 
-        /* --- 3D РЕАЛИСТИЧНЫЕ СЛОТЫ С ФИЗИКОЙ ВРАЩЕНИЯ --- */
-        .slots-window {{
-            display: flex; justify-content: center; gap: 12px;
-            background: #000; padding: 16px; border-radius: 20px;
-            border: 3px solid var(--accent-gold); margin: 16px 0;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 0 20px var(--accent-gold-glow);
-            perspective: 1000px;
-        }}
-        .reel-container {{
-            width: 70px; height: 90px; overflow: hidden;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(255,255,255,0.05) 50%, rgba(0,0,0,0.8) 100%);
-            border-radius: 12px; border: 1px solid var(--border-color);
-            position: relative;
-        }}
-        .reel-strip {{
-            display: flex; flex-direction: column; align-items: center;
-            position: absolute; width: 100%; top: 0;
-            transition: transform 0.1s linear;
-        }}
-        .symbol {{
-            width: 70px; height: 90px; display: flex;
-            align-items: center; justify-content: center;
-            font-size: 42px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
-        }}
+        /* СЛОТЫ 3D С БЛЮРОМ */
+        .slots-window {{ display: flex; justify-content: center; gap: 12px; background: #000; padding: 16px; border-radius: 20px; border: 3px solid var(--accent-gold); margin: 16px 0; box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 0 20px var(--accent-gold-glow); overflow: hidden; height: 130px; align-items: center; }}
+        .reel-container {{ width: 75px; height: 100px; overflow: hidden; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(255,255,255,0.04) 50%, rgba(0,0,0,0.9) 100%); border-radius: 12px; border: 1px solid var(--border-color); position: relative; }}
+        .reel-strip {{ display: flex; flex-direction: column; align-items: center; position: absolute; width: 100%; top: 0; }}
+        .symbol {{ width: 75px; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 46px; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.6)); }}
 
-        /* --- КОЛЕСО ФОРТУНЫ С УКАЗАТЕЛЕМ --- */
-        .wheel-wrapper {{ position: relative; width: 180px; height: 180px; margin: 20px auto; }}
-        .wheel-container {{
-            width: 100%; height: 100%; border-radius: 50%;
-            background: conic-gradient(#ff3838 0deg 60deg, #05c46b 60deg 120deg, #ffd700 120deg 180deg, #3c40c6 180deg 240deg, #f53b57 240deg 300deg, #0c2461 300deg 360deg);
-            border: 5px solid var(--accent-gold); box-shadow: 0 0 30px var(--accent-gold-glow);
-            transition: transform 3.5s cubic-bezier(0.1, 0.9, 0.1, 1);
-        }}
-        .wheel-pointer {{
-            position: absolute; top: -12px; left: calc(50% - 12px); z-index: 10;
-            width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 24px solid #fff;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
-        }}
+        /* РУЛЕТКА КОЛЕСО */
+        .roulette-wheel-box {{ position: relative; width: 160px; height: 160px; margin: 20px auto; border-radius: 50%; background: conic-gradient(#e84118 0deg 90deg, #2f3640 90deg 180deg, #4cd137 180deg 270deg, #fbc531 270deg 360deg); border: 5px solid var(--accent-gold); box-shadow: 0 0 30px var(--accent-gold-glow); transition: transform 3s cubic-bezier(0.15, 0.85, 0.15, 1); }}
+        .roulette-pointer {{ position: absolute; top: -14px; left: calc(50% - 10px); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 22px solid #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); z-index: 5; }}
+
+        /* КАРТЫ (БЛЭКДЖЕК / ХАЙ-ЛО) */
+        .card-box {{ display: inline-flex; align-items: center; justify-content: center; width: 55px; height: 75px; background: #fff; color: #000; border-radius: 8px; font-weight: 800; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); animation: flipCard 0.4s ease; }}
+        @keyframes flipCard {{ 0% {{ transform: rotateY(90deg) scale(0.8); opacity: 0; }} 100% {{ transform: rotateY(0deg) scale(1); opacity: 1; }} }}
     </style>
 </head>
 <body>
@@ -128,18 +103,18 @@ WEBAPP_HTML = f"""
     <div class="container">
         <!-- ЛОББИ -->
         <div id="lobby" class="lobby-grid">
-            <div class="game-card" onclick="openGame('slots')"><span class="game-icon">🎰</span><div class="game-title">Слоты 777</div><div class="game-desc">Реальное вращение</div></div>
-            <div class="game-card" onclick="openGame('roulette')"><span class="game-icon">🎡</span><div class="game-title">Рулетка</div><div class="game-desc">Цвета и зеро</div></div>
-            <div class="game-card" onclick="openGame('blackjack')"><span class="game-icon">🃏</span><div class="game-title">Блэкджек</div><div class="game-desc">Собери 21 очко</div></div>
-            <div class="game-card" onclick="openGame('mines')"><span class="game-icon">💣</span><div class="game-title">Минное поле</div><div class="game-desc">Ищи кристаллы</div></div>
-            <div class="game-card" onclick="openGame('crash')"><span class="game-icon">🚀</span><div class="game-title">Краш X</div><div class="game-desc">Улети до взрыва</div></div>
-            <div class="game-card" onclick="openGame('dice')"><span class="game-icon">🎲</span><div class="game-title">Кости</div><div class="game-desc">Больше / Меньше</div></div>
+            <div class="game-card" onclick="openGame('slots')"><span class="game-icon">🎰</span><div class="game-title">Слоты 777</div><div class="game-desc">Анимация 3D ленты</div></div>
+            <div class="game-card" onclick="openGame('roulette')"><span class="game-icon">🎡</span><div class="game-title">Рулетка</div><div class="game-desc">Вращение колеса</div></div>
+            <div class="game-card" onclick="openGame('blackjack')"><span class="game-icon">🃏</span><div class="game-title">Блэкджек</div><div class="game-desc">Раздача карт</div></div>
+            <div class="game-card" onclick="openGame('mines')"><span class="game-icon">💣</span><div class="game-title">Минное поле</div><div class="game-desc">Поиск алмазов</div></div>
+            <div class="game-card" onclick="openGame('crash')"><span class="game-icon">🚀</span><div class="game-title">Краш X</div><div class="game-desc">Полет ракеты</div></div>
+            <div class="game-card" onclick="openGame('dice')"><span class="game-icon">🎲</span><div class="game-title">Кости</div><div class="game-desc">Бросок кубика</div></div>
             <div class="game-card" onclick="openGame('coin')"><span class="game-icon">🪙</span><div class="game-title">Монетка</div><div class="game-desc">Орел или Решка</div></div>
-            <div class="game-card" onclick="openGame('plinko')"><span class="game-icon">🔺</span><div class="game-title">Плинко</div><div class="game-desc">Пирамида удачи</div></div>
-            <div class="game-card" onclick="openGame('hilo')"><span class="game-icon">📈</span><div class="game-title">Хай-Ло</div><div class="game-desc">Выше или ниже</div></div>
+            <div class="game-card" onclick="openGame('plinko')"><span class="game-icon">🔺</span><div class="game-title">Плинко</div><div class="game-desc">Пирамида шаров</div></div>
+            <div class="game-card" onclick="openGame('hilo')"><span class="game-icon">📈</span><div class="game-title">Хай-Ло</div><div class="game-desc">Ставки на карты</div></div>
             <div class="game-card" onclick="openGame('wheel')"><span class="game-icon">🎯</span><div class="game-title">Колесо Фортуны</div><div class="game-desc">Множители x5</div></div>
-            <div class="game-card" onclick="openGame('keno')"><span class="game-icon">🔢</span><div class="game-title">Кено</div><div class="game-desc">Лотерейный тираж</div></div>
-            <div class="game-card" onclick="openGame('scratch')"><span class="game-icon">🎫</span><div class="game-title">Скретч-карты</div><div class="game-desc">Стиральный билет</div></div>
+            <div class="game-card" onclick="openGame('keno')"><span class="game-icon">🔢</span><div class="game-title">Кено</div><div class="game-desc">Тираж лотереи</div></div>
+            <div class="game-card" onclick="openGame('scratch')"><span class="game-icon">🎫</span><div class="game-title">Скретч-карты</div><div class="game-desc">Стираемый билет</div></div>
         </div>
 
         <!-- 1. СЛОТЫ -->
@@ -152,7 +127,7 @@ WEBAPP_HTML = f"""
                 <div class="reel-container"><div class="reel-strip" id="strip3"></div></div>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="slotsBet" class="bet-input" value="100" min="10"></div>
-            <button class="action-btn" id="slotsBtn" onclick="playSlots()">Крутить!</button>
+            <button class="action-btn" id="slotsBtn" onclick="playSlots()">Крутить барабаны!</button>
             <div class="result-box" id="slotsResult"></div>
         </div>
 
@@ -160,13 +135,16 @@ WEBAPP_HTML = f"""
         <div id="game-roulette" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎡 Рулетка</h3>
-            <div class="flex-btns">
+            <div class="roulette-wheel-box" id="rouletteWheel">
+                <div class="roulette-pointer"></div>
+            </div>
+            <div class="flex-btns" style="margin-top: 15px;">
                 <button id="roul-red" onclick="selectRoulette('red')" class="selected">🔴 Красное (x2)</button>
                 <button id="roul-black" onclick="selectRoulette('black')">⚫ Черное (x2)</button>
                 <button id="roul-zero" onclick="selectRoulette('zero')">🟢 Зеро (x14)</button>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="rouletteBet" class="bet-input" value="100" min="10"></div>
-            <button class="action-btn" onclick="playRoulette()">Вращать</button>
+            <button class="action-btn" id="roulBtn" onclick="playRoulette()">Вращать колесо</button>
             <div class="result-box" id="rouletteResult"></div>
         </div>
 
@@ -175,16 +153,16 @@ WEBAPP_HTML = f"""
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🃏 Блэкджек 21</h3>
             <div style="background:rgba(0,0,0,0.3); padding:14px; border-radius:16px; margin:14px 0; border:1px solid var(--border-color);">
-                <div>Дилер: <span id="bjDealerScore">0</span></div>
-                <div style="font-size:24px; margin:6px 0;" id="bjDealerCards">🂠 🂠</div>
+                <div>Дилер (<span id="bjDealerScore">0</span>):</div>
+                <div style="display:flex; gap:8px; justify-content:center; margin:8px 0;" id="bjDealerCards"></div>
                 <hr style="border-color:var(--border-color); margin:10px 0;">
-                <div>Вы: <span id="bjPlayerScore">0</span></div>
-                <div style="font-size:24px; margin:6px 0;" id="bjPlayerCards">❓ ❓</div>
+                <div>Вы (<span id="bjPlayerScore">0</span>):</div>
+                <div style="display:flex; gap:8px; justify-content:center; margin:8px 0;" id="bjPlayerCards"></div>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="bjBet" class="bet-input" value="100" min="10"></div>
             <div class="flex-btns" id="bjControls" style="display:none;">
-                <button onclick="bjHit()" style="background:#05c46b; color:#000;">Взять</button>
-                <button onclick="bjStand()" style="background:#ff3838; color:#fff;">Хватит</button>
+                <button onclick="bjHit()" style="background:#4cd137; color:#000;">Взять карту</button>
+                <button onclick="bjStand()" style="background:#e84118; color:#fff;">Хватит</button>
             </div>
             <button class="action-btn" id="bjStartBtn" onclick="startBlackjack()">Раздать карты</button>
             <div class="result-box" id="bjResult"></div>
@@ -196,8 +174,8 @@ WEBAPP_HTML = f"""
             <h3>💣 Минное поле</h3>
             <div id="minesGrid" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; margin:16px 0;"></div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="minesBet" class="bet-input" value="100" min="10"></div>
-            <button class="action-btn" id="minesStartBtn" onclick="startMines()">Начать</button>
-            <button class="action-btn" id="minesCashoutBtn" onclick="cashoutMines()" style="display:none; background:#05c46b; margin-top:8px;">Забрать</button>
+            <button class="action-btn" id="minesStartBtn" onclick="startMines()">Начать игру</button>
+            <button class="action-btn" id="minesCashoutBtn" onclick="cashoutMines()" style="display:none; background:#4cd137; margin-top:8px;">Забрать выигрыш</button>
             <div class="result-box" id="minesResult"></div>
         </div>
 
@@ -205,9 +183,9 @@ WEBAPP_HTML = f"""
         <div id="game-crash" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🚀 Краш X</h3>
-            <div style="background:#000; height:120px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:800; color:var(--accent-gold); margin:16px 0; border:1px solid var(--accent-gold);" id="crashDisplay">1.00x</div>
+            <div style="background:#000; height:130px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:44px; font-weight:800; color:var(--accent-gold); margin:16px 0; border:1px solid var(--accent-gold); box-shadow:0 0 20px rgba(251,197,49,0.2);" id="crashDisplay">1.00x</div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="crashBet" class="bet-input" value="100" min="10"></div>
-            <button class="action-btn" id="crashBtn" onclick="startCrash()">Старт</button>
+            <button class="action-btn" id="crashBtn" onclick="startCrash()">Запустить ракету</button>
             <div class="result-box" id="crashResult"></div>
         </div>
 
@@ -215,12 +193,13 @@ WEBAPP_HTML = f"""
         <div id="game-dice" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎲 Кости</h3>
+            <div style="font-size:60px; margin:20px 0;" id="diceIcon">🎲</div>
             <div class="flex-btns">
                 <button id="dice-low" onclick="selectDice('low')" class="selected">Меньше 4 (x2)</button>
                 <button id="dice-high" onclick="selectDice('high')">Больше 3 (x2)</button>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="diceBet" class="bet-input" value="100" min="10"></div>
-            <button class="action-btn" onclick="playDice()">Бросить</button>
+            <button class="action-btn" onclick="playDice()">Бросить кости</button>
             <div class="result-box" id="diceResult"></div>
         </div>
 
@@ -228,12 +207,13 @@ WEBAPP_HTML = f"""
         <div id="game-coin" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🪙 Монетка</h3>
+            <div style="font-size:60px; margin:20px 0; transition: transform 0.5s;" id="coinIcon">🪙</div>
             <div class="flex-btns">
                 <button id="coin-heads" onclick="selectCoin('heads')" class="selected">🦅 Орел</button>
                 <button id="coin-tails" onclick="selectCoin('tails')">🪙 Решка</button>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="coinBet" class="bet-input" value="100" min="10"></div>
-            <button class="action-btn" onclick="playCoin()">Подкинуть</button>
+            <button class="action-btn" onclick="playCoin()">Подкинуть монетку</button>
             <div class="result-box" id="coinResult"></div>
         </div>
 
@@ -257,22 +237,23 @@ WEBAPP_HTML = f"""
         <div id="game-hilo" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>📈 Хай-Ло</h3>
-            <div style="font-size:52px; margin:20px 0;" id="hiloCard">🂡</div>
+            <div style="margin:20px 0; display:flex; justify-content:center;" id="hiloCardBox">
+                <div class="card-box" id="hiloCard">7</div>
+            </div>
             <div class="flex-btns">
                 <button onclick="playHilo('lower')">📉 Ниже</button>
                 <button onclick="playHilo('higher')">📈 Выше</button>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="hiloBet" class="bet-input" value="100" min="10"></div>
-            <div class="result-box" id="hiloResult">Угадайте карту</div>
+            <div class="result-box" id="hiloResult">Угадайте номинал карты</div>
         </div>
 
         <!-- 10. КОЛЕСО ФОРТУНЫ -->
         <div id="game-wheel" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎯 Колесо Фортуны</h3>
-            <div class="wheel-wrapper">
-                <div class="wheel-pointer"></div>
-                <div class="wheel-container" id="fortuneWheel"></div>
+            <div class="roulette-wheel-box" id="fortuneWheel">
+                <div class="roulette-pointer"></div>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="wheelBet" class="bet-input" value="100" min="10"></div>
             <button class="action-btn" onclick="playWheel()">Крутить колесо</button>
@@ -283,9 +264,9 @@ WEBAPP_HTML = f"""
         <div id="game-keno" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🔢 Кено Лото</h3>
-            <div style="font-size:13px; color:var(--text-dim); margin-bottom:10px;">Выпало чисел: <span id="kenoDrawn" style="color:var(--accent-gold); font-weight:bold;">-</span></div>
+            <div style="font-size:13px; color:var(--text-dim); margin-bottom:10px;">Выпавшие числа: <span id="kenoDrawn" style="color:var(--accent-gold); font-weight:bold;">-</span></div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="kenoBet" class="bet-input" value="100" min="10"></div>
-            <button class="action-btn" onclick="playKeno()">Розыгрыш тиража</button>
+            <button class="action-btn" onclick="playKeno()">Провести тираж</button>
             <div class="result-box" id="kenoResult"></div>
         </div>
 
@@ -294,14 +275,14 @@ WEBAPP_HTML = f"""
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎫 Скретч-карты</h3>
             <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin:16px 0;" id="scratchGrid">
-                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:65px; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer;" onclick="revealScratch(0)" id="sc0">❓</div>
-                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:65px; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer;" onclick="revealScratch(1)" id="sc1">❓</div>
-                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:65px; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer;" onclick="revealScratch(2)" id="sc2">❓</div>
-                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:65px; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer;" onclick="revealScratch(3)" id="sc3">❓</div>
+                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:70px; display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer;" onclick="revealScratch(0)" id="sc0">❓</div>
+                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:70px; display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer;" onclick="revealScratch(1)" id="sc1">❓</div>
+                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:70px; display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer;" onclick="revealScratch(2)" id="sc2">❓</div>
+                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:70px; display:flex; align-items:center; justify-content:center; font-size:30px; cursor:pointer;" onclick="revealScratch(3)" id="sc3">❓</div>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="scratchBet" class="bet-input" value="100" min="10"></div>
-            <button class="action-btn" onclick="startScratch()">Новая карта</button>
-            <div class="result-box" id="scratchResult">Сотрите ячейки</div>
+            <button class="action-btn" onclick="startScratch()">Новый билет</button>
+            <div class="result-box" id="scratchResult">Сотрите защитный слой</div>
         </div>
     </div>
 
@@ -353,57 +334,53 @@ WEBAPP_HTML = f"""
             document.getElementById(`game-${{gameId}}`).classList.add('active');
         }}
 
-        /* --- СЛОТЫ С ФИЗИКОЙ И 3D ЛЕНТОЙ --- */
+        /* --- 1. СЛОТЫ (3D ЛЕНТА) --- */
         const symbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
-        function createReel(stripId) {{
+        function buildReelStrip(stripId) {{
             const strip = document.getElementById(stripId);
             strip.innerHTML = '';
-            for(let i = 0; i < 30; i++) {{
+            for(let i=0; i<35; i++) {{
                 const div = document.createElement('div');
                 div.className = 'symbol';
                 div.innerText = symbols[Math.floor(Math.random() * symbols.length)];
                 strip.appendChild(div);
             }}
         }}
-        createReel('strip1'); createReel('strip2'); createReel('strip3');
+        buildReelStrip('strip1'); buildReelStrip('strip2'); buildReelStrip('strip3');
 
-        let isSpinning = false;
+        let slotsActive = false;
         function playSlots() {{
-            if (isSpinning) return;
+            if (slotsActive) return;
             let bet = parseInt(document.getElementById('slotsBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
-            
-            isSpinning = true;
-            updateBalance(-bet); triggerHaptic('heavy');
+            slotsActive = true; updateBalance(-bet); triggerHaptic('heavy');
             document.getElementById('slotsBtn').disabled = true;
 
             const res1 = symbols[Math.floor(Math.random() * symbols.length)];
             const res2 = symbols[Math.floor(Math.random() * symbols.length)];
             const res3 = symbols[Math.floor(Math.random() * symbols.length)];
 
-            function spinStrip(stripId, targetSymbol, delay) {{
+            function animateReel(stripId, targetSymbol, delay) {{
                 return new Promise(resolve => {{
                     const strip = document.getElementById(stripId);
-                    createReel(stripId);
-                    strip.children[28].innerText = targetSymbol;
+                    buildReelStrip(stripId);
+                    strip.children[32].innerText = targetSymbol;
                     strip.style.transition = 'none';
                     strip.style.transform = 'translateY(0px)';
-                    
                     setTimeout(() => {{
-                        strip.style.transition = `transform ${{2 + delay}}s cubic-bezier(0.15, 0.85, 0.35, 1.2)`;
-                        strip.style.transform = `translateY(-${{28 * 90}}px)`;
-                        setTimeout(resolve, (2 + delay) * 1000);
+                        strip.style.transition = `transform ${{2.2 + delay}}s cubic-bezier(0.12, 0.8, 0.28, 1)`;
+                        strip.style.transform = `translateY(-${{32 * 100}}px)`;
+                        setTimeout(resolve, (2.2 + delay) * 1000);
                     }}, 50);
                 }});
             }}
 
             Promise.all([
-                spinStrip('strip1', res1, 0),
-                spinStrip('strip2', res2, 0.4),
-                spinStrip('strip3', res3, 0.8)
+                animateReel('strip1', res1, 0),
+                animateReel('strip2', res2, 0.3),
+                animateReel('strip3', res3, 0.6)
             ]).then(() => {{
-                isSpinning = false;
-                document.getElementById('slotsBtn').disabled = false;
+                slotsActive = false; document.getElementById('slotsBtn').disabled = false;
                 let resBox = document.getElementById('slotsResult');
                 if (res1 === res2 && res2 === res3) {{
                     let win = bet * 5; updateBalance(win);
@@ -420,8 +397,8 @@ WEBAPP_HTML = f"""
             }});
         }}
 
-        /* РУЛЕТКА */
-        let selectedRoulette = 'red';
+        /* --- 2. РУЛЕТКА --- */
+        let selectedRoulette = 'red', currentRoulRot = 0;
         function selectRoulette(val) {{
             selectedRoulette = val;
             document.querySelectorAll('#game-roulette .flex-btns button').forEach(b => b.classList.remove('selected'));
@@ -431,23 +408,29 @@ WEBAPP_HTML = f"""
             let bet = parseInt(document.getElementById('rouletteBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('heavy');
-            let num = Math.floor(Math.random() * 37);
-            let color = num === 0 ? 'zero' : (num % 2 === 0 ? 'black' : 'red');
-            let resBox = document.getElementById('rouletteResult');
-            if (color === selectedRoulette) {{
-                let mult = selectedRoulette === 'zero' ? 14 : 2;
-                let win = bet * mult; updateBalance(win);
-                resBox.innerHTML = `<span style="color:var(--accent-green);">🎯 Выпало ${{num}} (${{color.toUpperCase()}})! +${{win}}</span>`;
-                triggerHaptic('success');
-            }} else {{
-                resBox.innerHTML = `<span style="color:var(--accent-red);">❌ Выпало ${{num}} (${{color.toUpperCase()}}). Проигрыш</span>`;
-                triggerHaptic('error');
-            }}
+            
+            currentRoulRot += Math.floor(Math.random() * 1440) + 1080;
+            document.getElementById('rouletteWheel').style.transform = `rotate(${{currentRoulRot}}deg)`;
+
+            setTimeout(() => {{
+                let num = Math.floor(Math.random() * 37);
+                let color = num === 0 ? 'zero' : (num % 2 === 0 ? 'black' : 'red');
+                let resBox = document.getElementById('rouletteResult');
+                if (color === selectedRoulette) {{
+                    let mult = selectedRoulette === 'zero' ? 14 : 2;
+                    let win = bet * mult; updateBalance(win);
+                    resBox.innerHTML = `<span style="color:var(--accent-green);">🎯 ${{num}} (${{color.toUpperCase()}})! +${{win}}</span>`;
+                    triggerHaptic('success');
+                }} else {{
+                    resBox.innerHTML = `<span style="color:var(--accent-red);">❌ ${{num}} (${{color.toUpperCase()}}). Проигрыш</span>`;
+                    triggerHaptic('error');
+                }}
+            }}, 3000);
         }}
 
-        /* БЛЭКДЖЕК */
+        /* --- 3. БЛЭКДЖЕК --- */
         let bjState = {{ player: [], dealer: [], playing: false }};
-        function getCard() {{ return Math.min(10, Math.floor(Math.random() * 10) + 1); }}
+        function getCard() {{ return Math.min(10, Math.floor(Math.random() * 10) + 2); }}
         function sumHand(h) {{ return h.reduce((a,b)=>a+b, 0); }}
         function startBlackjack() {{
             let bet = parseInt(document.getElementById('bjBet').value);
@@ -460,8 +443,8 @@ WEBAPP_HTML = f"""
             renderBJ();
         }}
         function renderBJ() {{
-            document.getElementById('bjPlayerCards').innerText = bjState.player.join(' ');
-            document.getElementById('bjDealerCards').innerText = bjState.dealer.join(' ') + ' 🂠';
+            document.getElementById('bjPlayerCards').innerHTML = bjState.player.map(c => `<div class="card-box">${{c}}</div>`).join('');
+            document.getElementById('bjDealerCards').innerHTML = bjState.dealer.map(c => `<div class="card-box">${{c}}</div>`).join('') + '<div class="card-box" style="background:#2f3640; color:#fff;">🂠</div>';
             document.getElementById('bjPlayerScore').innerText = sumHand(bjState.player);
             document.getElementById('bjDealerScore').innerText = sumHand(bjState.dealer);
         }}
@@ -484,14 +467,14 @@ WEBAPP_HTML = f"""
             if (win === true) {{ updateBalance(bet * 2); triggerHaptic('success'); }}
             else if (win === 'draw') {{ updateBalance(bet); }}
             else {{ triggerHaptic('error'); }}
-            document.getElementById('bjDealerCards').innerText = bjState.dealer.join(' ');
+            document.getElementById('bjDealerCards').innerHTML = bjState.dealer.map(c => `<div class="card-box">${{c}}</div>`).join('');
             document.getElementById('bjDealerScore').innerText = sumHand(bjState.dealer);
             document.getElementById('bjResult').innerText = msg;
             document.getElementById('bjStartBtn').style.display = 'block';
             document.getElementById('bjControls').style.display = 'none';
         }}
 
-        /* МИННОЕ ПОЛЕ */
+        /* --- 4. МИННОЕ ПОЛЕ --- */
         let minesState = {{ active: false, bombs: [], opened: 0, mult: 1.2 }};
         function startMines() {{
             let bet = parseInt(document.getElementById('minesBet').value);
@@ -503,7 +486,7 @@ WEBAPP_HTML = f"""
             minesState = {{ active: true, bombs: bombs, opened: 0, mult: 1.2, bet: bet }};
             for(let i=0; i<25; i++) {{
                 let tile = document.createElement('div');
-                tile.style.cssText = "aspect-ratio:1; background:rgba(255,255,255,0.06); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer;";
+                tile.style.cssText = "aspect-ratio:1; background:rgba(255,255,255,0.06); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; transition:0.2s;";
                 tile.onclick = () => clickMine(i, tile);
                 grid.appendChild(tile);
             }}
@@ -512,16 +495,16 @@ WEBAPP_HTML = f"""
             document.getElementById('minesResult').innerText = '💎 Ищите кристаллы!';
         }}
         function clickMine(idx, tile) {{
-            if(!minesState.active || tile.style.background.includes('rgb')) return;
+            if(!minesState.active || tile.style.background.includes('rgb(76')) return;
             if(minesState.bombs.includes(idx)) {{
-                tile.style.background = 'rgba(255,56,56,0.4)'; tile.innerText = '💣';
+                tile.style.background = 'rgba(232,65,24,0.5)'; tile.innerText = '💣';
                 minesState.active = false;
                 document.getElementById('minesResult').innerHTML = '<span style="color:var(--accent-red);">💥 БУМ! Проигрыш</span>';
                 document.getElementById('minesStartBtn').style.display = 'block';
                 document.getElementById('minesCashoutBtn').style.display = 'none';
                 triggerHaptic('error');
             }} else {{
-                tile.style.background = 'rgba(5,196,107,0.4)'; tile.innerText = '💎';
+                tile.style.background = 'rgba(76,209,55,0.4)'; tile.innerText = '💎';
                 minesState.opened++; minesState.mult += 0.3;
                 let cur = Math.floor(minesState.bet * minesState.mult);
                 document.getElementById('minesResult').innerText = `💰 Профит: +${{cur}} (x${{minesState.mult.toFixed(2)}})`;
@@ -538,7 +521,7 @@ WEBAPP_HTML = f"""
             triggerHaptic('success');
         }}
 
-        /* КРАШ */
+        /* --- 5. КРАШ --- */
         let crashInterval = null;
         function startCrash() {{
             let bet = parseInt(document.getElementById('crashBet').value);
@@ -552,7 +535,7 @@ WEBAPP_HTML = f"""
                 active = false; clearInterval(crashInterval);
                 let win = Math.floor(bet * mult); updateBalance(win);
                 document.getElementById('crashResult').innerHTML = `<span style="color:var(--accent-green);">🎉 Успел! +${{win}}</span>`;
-                btn.innerText = 'Старт'; btn.onclick = startCrash; triggerHaptic('success');
+                btn.innerText = 'Запустить ракету'; btn.onclick = startCrash; triggerHaptic('success');
             }};
             crashInterval = setInterval(() => {{
                 mult += 0.05; display.innerText = mult.toFixed(2) + 'x';
@@ -560,12 +543,12 @@ WEBAPP_HTML = f"""
                     active = false; clearInterval(crashInterval);
                     display.innerText = '💥 CRASH!';
                     document.getElementById('crashResult').innerHTML = `<span style="color:var(--accent-red);">😢 Улетел на ${{crashPoint}}x</span>`;
-                    btn.innerText = 'Старт'; btn.onclick = startCrash; triggerHaptic('error');
+                    btn.innerText = 'Запустить ракету'; btn.onclick = startCrash; triggerHaptic('error');
                 }}
-            }}, 100);
+            }}, 90);
         }}
 
-        /* КОСТИ */
+        /* --- 6. КОСТИ --- */
         let selectedDice = 'low';
         function selectDice(val) {{
             selectedDice = val;
@@ -577,6 +560,9 @@ WEBAPP_HTML = f"""
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
             let roll = Math.floor(Math.random()*6)+1;
+            document.getElementById('diceIcon').style.transform = 'rotate(360deg)';
+            setTimeout(() => document.getElementById('diceIcon').style.transform = 'rotate(0deg)', 400);
+            
             let win = (selectedDice === 'low' && roll <= 3) || (selectedDice === 'high' && roll >= 4);
             let res = document.getElementById('diceResult');
             if(win) {{
@@ -589,7 +575,7 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* МОНЕТКА */
+        /* --- 7. МОНЕТКА --- */
         let selectedCoin = 'heads';
         function selectCoin(val) {{
             selectedCoin = val;
@@ -600,6 +586,10 @@ WEBAPP_HTML = f"""
             let bet = parseInt(document.getElementById('coinBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
+            let coin = document.getElementById('coinIcon');
+            coin.style.transform = 'rotateY(720deg)';
+            setTimeout(() => coin.style.transform = 'rotateY(0deg)', 500);
+
             let resVal = Math.random() < 0.5 ? 'heads' : 'tails';
             let res = document.getElementById('coinResult');
             if(resVal === selectedCoin) {{
@@ -612,7 +602,7 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* ПЛИНКО */
+        /* --- 8. ПЛИНКО --- */
         function playPlinko() {{
             let bet = parseInt(document.getElementById('plinkoBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -631,14 +621,19 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* ХАЙ-ЛО */
+        /* --- 9. ХАЙ-ЛО --- */
         let hiloCurrent = Math.floor(Math.random() * 10) + 2;
         function playHilo(guess) {{
             let bet = parseInt(document.getElementById('hiloBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
             let next = Math.floor(Math.random() * 10) + 2;
-            document.getElementById('hiloCard').innerText = '🎴 ' + next;
+            let cardBox = document.getElementById('hiloCard');
+            cardBox.innerText = next;
+            cardBox.style.animation = 'none';
+            cardBox.offsetHeight;
+            cardBox.style.animation = 'flipCard 0.4s ease';
+
             let win = (guess === 'higher' && next > hiloCurrent) || (guess === 'lower' && next < hiloCurrent);
             let res = document.getElementById('hiloResult');
             if(win) {{
@@ -653,15 +648,15 @@ WEBAPP_HTML = f"""
             hiloCurrent = next;
         }}
 
-        /* КОЛЕСО ФОРТУНЫ */
-        let currentWheelRot = 0;
+        /* --- 10. КОЛЕСО ФОРТУНЫ --- */
+        let currentWheelRot2 = 0;
         function playWheel() {{
             let bet = parseInt(document.getElementById('wheelBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('heavy');
-            let wheel = document.getElementById('fortuneWheel');
-            currentWheelRot += Math.floor(Math.random() * 1440) + 1080;
-            wheel.style.transform = `rotate(${{currentWheelRot}}deg)`;
+            currentWheelRot2 += Math.floor(Math.random() * 1440) + 1080;
+            document.getElementById('fortuneWheel').style.transform = `rotate(${{currentWheelRot2}}deg)`;
+
             setTimeout(() => {{
                 let mults = [0, 2, 1, 5, 0, 3];
                 let m = mults[Math.floor(Math.random() * mults.length)];
@@ -674,10 +669,10 @@ WEBAPP_HTML = f"""
                     res.innerHTML = `<span style="color:var(--accent-red);">🎯 Сектор НОЛЬ. Мимо</span>`;
                     triggerHaptic('error');
                 }}
-            }}, 3500);
+            }}, 3000);
         }}
 
-        /* КЕНО */
+        /* --- 11. КЕНО --- */
         function playKeno() {{
             let bet = parseInt(document.getElementById('kenoBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -696,7 +691,7 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* СКРЕТЧ-КАРТЫ */
+        /* --- 12. СКРЕТЧ-КАРТЫ --- */
         let scratchItems = ['💎', '💎', '🍒', '🍋'];
         function startScratch() {{
             let bet = parseInt(document.getElementById('scratchBet').value);
@@ -707,13 +702,13 @@ WEBAPP_HTML = f"""
                 let el = document.getElementById(`sc${{i}}`);
                 el.innerText = '❓'; el.style.background = 'rgba(255,255,255,0.05)';
             }}
-            document.getElementById('scratchResult').innerText = 'Сотрите ячейки';
+            document.getElementById('scratchResult').innerText = 'Сотрите защитный слой';
         }}
         function revealScratch(idx) {{
             let el = document.getElementById(`sc${{idx}}`);
             if(el.innerText !== '❓') return;
             el.innerText = scratchItems[idx];
-            el.style.background = 'rgba(5,196,107,0.2)';
+            el.style.background = 'rgba(76,209,55,0.25)';
             triggerHaptic('light');
             let revealedCount = Array.from(document.querySelectorAll('#scratchGrid > div')).filter(e => e.innerText !== '❓').length;
             if(revealedCount === 4) {{
@@ -725,7 +720,7 @@ WEBAPP_HTML = f"""
                     res.innerHTML = `<span style="color:var(--accent-green);">🎫 Найдено алмазов! +${{win}}</span>`;
                     triggerHaptic('success');
                 }} else {{
-                    res.innerHTML = `<span style="color:var(--accent-red);">🎫 Пустая карта</span>`;
+                    res.innerHTML = `<span style="color:var(--accent-red);">🎫 Пустой билет</span>`;
                     triggerHaptic('error');
                 }}
             }}
@@ -755,7 +750,7 @@ async def inline_handler(query: InlineQuery):
         InlineQueryResultArticle(
             id="casino_app",
             title="🎰 Casino Royale",
-            description="Казино с анимацией",
+            description="Мобильное казино с анимацией",
             input_message_content=InputTextMessageContent(message_text="🎰 Я открыл казино! Присоединяйся."),
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🎲 Играть", web_app=WebAppInfo(url=WEBAPP_URL))]])
         )
@@ -778,7 +773,7 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
 
-    print(f"Бот запущен на порту {port}!")
+    print(f"Бот запущен на порту {port} с полноценными анимациями и Supabase!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
