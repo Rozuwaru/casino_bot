@@ -15,10 +15,10 @@ from aiogram.types import (
 from aiohttp import web
 
 # ЗАМЕНИ НА СВОЙ ТОКЕН ОТ BOTFATHER
-TOKEN = "ТУТ_ТВОЙ_ТОКЕН_БОТА"
+TOKEN = "8752641180:AAEFfiJn6ykMK_ymFE4hc6kHKBOzgb9YWK8"
 
 # ЗАМЕНИ НА СВОЙ URL С RENDER (например: https://my-casino-bot.onrender.com/webapp)
-WEBAPP_URL = "https://ТВОЕ_ПРИЛОЖЕНИЕ.onrender.com/webapp"
+WEBAPP_URL = "https://casino-bot-y2qo.onrender.com"
 
 # --- БАЗА ДАННЫХ ---
 def init_db():
