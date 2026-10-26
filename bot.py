@@ -10,6 +10,7 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton,
     TelegramObject,
+    BotCommand,
 )
 from typing import Callable, Dict, Any, Awaitable
 from aiohttp import web
@@ -18,28 +19,30 @@ from supabase import create_client, Client
 # --- КОНФИГУРАЦИЯ ---
 TOKEN = "8752641180:AAET94FACuNdO26CCdFHFyv1vJhSiv3O7F4"
 SUPABASE_URL = "https://lnskcqunuaewqcsvcpvr.supabase.co"
-SUPABASE_KEY = "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2tjcXVudWFld3Fjc3ZjcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzE2MjQsImV4cCI6MjEwODYwNzYyNH0.g0F_E6hIOeholtABi_WsbMzqT4H-49wTH5XYXAk_0Nc"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2tjcXVudWFld3Fjc3ZjcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzE2MjQsImV4cCI6MjEwODYwNzYyNH0.g0F_E6hIOeholtABi_WsbMzqT4H-49wTH5XYXAk_0Nc"
 
 ADMIN_USERNAME = "p0tat0777"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 router = Router()
 
-# Временное хранилище сессий рулетки для каждого игрока: {user_id: {'stake': float, 'bets': set}}
+# Сессии рулетки: {user_id: {'stake': float, 'bets': set}}
 roulette_sessions: Dict[int, Dict[str, Any]] = {}
 
 def fmt(val: float) -> str:
-    """Форматирование чисел с разделителями (например, 1,000,000)"""
+    """Форматирование чисел с разделителями"""
     return f"{int(val):,}"
 
+def fmt_blue(val: float) -> str:
+    """Красивые синие цифры для баланса и выигрышей"""
+    return f"🔷 **{fmt(val)}** 🪙"
+
 def is_admin(user) -> bool:
-    """Проверка прав администратора по Telegram юзернейму"""
     if not user.username:
         return False
     return user.username.lower() == ADMIN_USERNAME.lower()
 
 def get_main_menu_kb(user) -> InlineKeyboardMarkup:
-    """Динамическое меню: кнопка админки видна только администратору"""
     buttons = [
         [InlineKeyboardButton(text="🎮 Список игр", callback_data="games_list")]
     ]
@@ -48,7 +51,6 @@ def get_main_menu_kb(user) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 async def find_user_in_db(identifier: str):
-    """Поиск пользователя в Supabase по ID или юзернейму"""
     clean_id = identifier.strip().lstrip('@')
     try:
         if clean_id.isdigit():
@@ -60,7 +62,7 @@ async def find_user_in_db(identifier: str):
         logging.error(f"Find User Error: {e}")
     return None
 
-# --- MIDDLEWARE ДЛЯ УЧЕТА ПОЛЬЗОВАТЕЛЕЙ И СООБЩЕНИЙ ---
+# --- MIDDLEWARE (НАЧАЛЬНЫЙ БАЛАНС 1000) ---
 class DatabaseMiddleware(BaseMiddleware):
     async def __call__(
         self,
@@ -89,7 +91,7 @@ class DatabaseMiddleware(BaseMiddleware):
                     supabase.table('users').insert({
                         'user_id': user_id,
                         'username': username,
-                        'balance': 1000000.0,
+                        'balance': 1000.0,
                         'message_count': 1
                     }).execute()
             except Exception as e:
@@ -102,15 +104,15 @@ async def get_user_balance(user_id: int) -> float:
         response = supabase.table('users').select('balance').eq('user_id', user_id).execute()
         if response.data and len(response.data) > 0:
             return float(response.data[0]['balance'])
-        return 1000000.0
+        return 1000.0
     except Exception as e:
         logging.error(f"Get Balance Error: {e}")
-        return 1000000.0
+        return 1000.0
 
 async def update_user_balance_by_id(user_id: int, amount: float) -> float:
     try:
         res = supabase.table('users').select('balance').eq('user_id', user_id).execute()
-        current = float(res.data[0]['balance']) if res.data else 1000000.0
+        current = float(res.data[0]['balance']) if res.data else 1000.0
         new_balance = current + amount
         supabase.table('users').update({'balance': new_balance}).eq('user_id', user_id).execute()
         return new_balance
@@ -118,7 +120,7 @@ async def update_user_balance_by_id(user_id: int, amount: float) -> float:
         logging.error(f"Update Balance Error: {e}")
         return 0.0
 
-# --- ГЛАВНОЕ МЕНЮ (ОФОРМЛЕНИЕ КАК НА СКРИНШОТЕ) ---
+# --- ГЛАВНОЕ МЕНЮ ---
 @router.message(CommandStart())
 async def cmd_start(message: Message):
     user = message.from_user
@@ -128,18 +130,9 @@ async def cmd_start(message: Message):
     username_display = user.username if user.username else user.full_name
     
     text = (
-        f"👤 Меню игрока: {username_display}{status_badge}\n\n"
-        f"🎰 КАЗИНО И ИГРЫ (Баланс: {fmt(balance)} 🪙):\n\n"
-        f"🔥 Доступные игры в чате:\n"
-        f"• `/dice <ставка> <числа 1-6>` — Кости (выигрыш до x6)\n"
-        f"• `/coin <ставка> <орел/решка>` — Монетка (x2)\n"
-        f"• `/slots <ставка>` — Слоты (777=x10, 77=x5, 3 одинак.=x3, 2 одинак.=x2)\n"
-        f"• `/roulette <ставка>` — Рулетка (мульти-ставки на игровом поле)\n"
-        f"• `/hilo <ставка> <high/low>` — Хай-Ло (x1.8)\n"
-        f"• `/darts <ставка>` — Дартс (до x5)\n"
-        f"• `/basketball <ставка>` — Баскетбол (x2)\n"
-        f"• `/football <ставка>` — Футбол (x1.8)\n"
-        f"• `/bowling <ставка>` — Боулинг (до x4)"
+        f"👤 Меню игрока: **{username_display}**{status_badge}\n\n"
+        f"🎰 КАЗИНО И ИГРЫ (Баланс: {fmt_blue(balance)}):\n\n"
+        f"Добро пожаловать в элитный игровой клуб! Выберите нужный раздел в меню ниже."
     )
     await message.answer(text, reply_markup=get_main_menu_kb(user), parse_mode="Markdown")
 
@@ -152,18 +145,9 @@ async def cb_main_menu(callback: CallbackQuery):
     username_display = user.username if user.username else user.full_name
     
     text = (
-        f"👤 Меню игрока: {username_display}{status_badge}\n\n"
-        f"🎰 КАЗИНО И ИГРЫ (Баланс: {fmt(balance)} 🪙):\n\n"
-        f"🔥 Доступные игры в чате:\n"
-        f"• `/dice <ставка> <числа 1-6>` — Кости (выигрыш до x6)\n"
-        f"• `/coin <ставка> <орел/решка>` — Монетка (x2)\n"
-        f"• `/slots <ставка>` — Слоты (777=x10, 77=x5, 3 одинак.=x3, 2 одинак.=x2)\n"
-        f"• `/roulette <ставка>` — Рулетка (мульти-ставки на игровом поле)\n"
-        f"• `/hilo <ставка> <high/low>` — Хай-Ло (x1.8)\n"
-        f"• `/darts <ставка>` — Дартс (до x5)\n"
-        f"• `/basketball <ставка>` — Баскетбол (x2)\n"
-        f"• `/football <ставка>` — Футбол (x1.8)\n"
-        f"• `/bowling <ставка>` — Боулинг (до x4)"
+        f"👤 Меню игрока: **{username_display}**{status_badge}\n\n"
+        f"🎰 КАЗИНО И ИГРЫ (Баланс: {fmt_blue(balance)}):\n\n"
+        f"Добро пожаловать в элитный игровой клуб! Выберите нужный раздел в меню ниже."
     )
     await callback.message.edit_text(text, reply_markup=get_main_menu_kb(user), parse_mode="Markdown")
     await callback.answer()
@@ -176,13 +160,13 @@ async def cb_games_list(callback: CallbackQuery):
     username_display = user.username if user.username else user.full_name
 
     text = (
-        f"👤 Меню игрока: {username_display}{status_badge}\n\n"
-        f"🎰 КАЗИНО И ИГРЫ (Баланс: {fmt(balance)} 🪙):\n\n"
+        f"👤 Меню игрока: **{username_display}**{status_badge}\n\n"
+        f"🎰 КАЗИНО И ИГРЫ (Баланс: {fmt_blue(balance)}):\n\n"
         f"🔥 Доступные игры в чате:\n"
-        f"• `/dice <ставка> <числа 1-6>` — Кости (выигрыш до x6)\n"
+        f"• `/dice <ставка> <числа 1-6>` — Кости (до x6)\n"
         f"• `/coin <ставка> <орел/решка>` — Монетка (x2)\n"
         f"• `/slots <ставка>` — Слоты (777=x10, 77=x5, 3 одинак.=x3, 2 одинак.=x2)\n"
-        f"• `/roulette <ставка>` — Рулетка (мульти-ставки на игровом поле)\n"
+        f"• `/roulette` — Реальная рулетка (интерактивное поле)\n"
         f"• `/hilo <ставка> <high/low>` — Хай-Ло (x1.8)\n"
         f"• `/darts <ставка>` — Дартс (до x5)\n"
         f"• `/basketball <ставка>` — Баскетбол (x2)\n"
@@ -222,7 +206,7 @@ async def cb_admin_panel(callback: CallbackQuery):
 async def cmd_dice(message: Message):
     args = message.text.split()
     if len(args) < 3:
-        await message.answer("⚠️ Использование: `/dice <ставка> <числа от 1 до 6...>`\nПример: `/dice 100000 3 5`", parse_mode="Markdown")
+        await message.answer("⚠️ Использование: `/dice <ставка> <числа от 1 до 6...>`\nПример: `/dice 100 3 5`", parse_mode="Markdown")
         return
     try:
         bet = float(args[1])
@@ -237,7 +221,7 @@ async def cmd_dice(message: Message):
     user_id = message.from_user.id
     balance = await get_user_balance(user_id)
     if balance < bet:
-        await message.answer(f"❌ Недостаточно средств! Баланс: {fmt(balance)} 🪙")
+        await message.answer(f"❌ Недостаточно средств! Баланс: {fmt_blue(balance)}")
         return
 
     await update_user_balance_by_id(user_id, -bet)
@@ -250,10 +234,10 @@ async def cmd_dice(message: Message):
         win = bet * mult
         await update_user_balance_by_id(user_id, win)
         new_bal = await get_user_balance(user_id)
-        await message.answer(f"🎲 Выпало {val}. Выигрыш +{fmt(win)} 🪙!\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"🎲 Выпало {val}. Выигрыш +{fmt_blue(win)}!\n💰 Баланс: {fmt_blue(new_bal)}")
     else:
         new_bal = await get_user_balance(user_id)
-        await message.answer(f"🎲 Выпало {val}. Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"🎲 Выпало {val}. Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt_blue(new_bal)}")
 
 @router.message(Command("slots"))
 async def cmd_slots(message: Message):
@@ -274,15 +258,12 @@ async def cmd_slots(message: Message):
 
     await update_user_balance_by_id(user_id, -bet)
     dice_msg = await message.answer_dice(emoji="🎰")
-    val = dice_msg.dice.value # 1 до 64
+    val = dice_msg.dice.value
     await asyncio.sleep(3)
 
-    # Декодируем значение слотов (1-64) в 3 барабана (0-3)
     idx = val - 1
     r1, r2, r3 = idx // 16, (idx // 4) % 4, idx % 4
 
-    # Точные правила множителей слотов:
-    # 777 = x10, 77... = x5, любые 3 одинаковые = x3, любые 2 первые одинаковые = x2
     if r1 == 3 and r2 == 3 and r3 == 3:
         mult = 10
         desc = "🔥 ДЖЕКПОТ (777)!"
@@ -305,14 +286,15 @@ async def cmd_slots(message: Message):
     
     new_bal = await get_user_balance(user_id)
     if win > 0:
-        await message.answer(f"🎰 {desc} Вы выиграли +{fmt(win)} 🪙!\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"🎰 {desc} Вы выиграли +{fmt_blue(win)}!\n💰 Баланс: {fmt_blue(new_bal)}")
     else:
-        await message.answer(f"🎰 {desc} Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"🎰 {desc} Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt_blue(new_bal)}")
 
-# --- РЕАЛЬНАЯ РУЛЕТКА (МЕНЮ, МУЛЬТИ-СТАВКИ, ИНФО-КНОПКА БЕЗ КОЭФФИЦИЕНТОВ) ---
+# --- ИНТЕРАКТИВНАЯ РУЛЕТКА ---
 
 def get_roulette_keyboard(user_id: int) -> InlineKeyboardMarkup:
-    session = roulette_sessions.get(user_id, {'bets': set()})
+    session = roulette_sessions.get(user_id, {'stake': 1000.0, 'bets': set()})
+    stake = session['stake']
     active_bets = session['bets']
 
     def mk_btn(text: str, key: str) -> InlineKeyboardButton:
@@ -320,44 +302,62 @@ def get_roulette_keyboard(user_id: int) -> InlineKeyboardMarkup:
         return InlineKeyboardButton(text=f"{prefix}{text}", callback_data=f"roul_toggle:{key}")
 
     kb = [
+        [
+            InlineKeyboardButton(text="➖", callback_data="roul_stake_down"),
+            InlineKeyboardButton(text=f"💵 Ставка: {fmt(stake)} 🪙", callback_data="roul_noop"),
+            InlineKeyboardButton(text="➕", callback_data="roul_stake_up")
+        ],
         [mk_btn("Красное", "red"), mk_btn("Черное", "black")],
         [mk_btn("1-18", "low"), mk_btn("19-36", "high")],
         [mk_btn("1-12", "dozen1"), mk_btn("13-24", "dozen2"), mk_btn("25-36", "dozen3")],
         [mk_btn("Колонка 1", "col1"), mk_btn("Колонка 2", "col2"), mk_btn("Колонка 3", "col3")],
         [mk_btn("Зеро [0]", "zero")],
-        [InlineKeyboardButton(text="ℹ️ Информация", callback_data="roul_info"),
-         InlineKeyboardButton(text="🎲 Крутить рулетку", callback_data="roul_spin")]
+        [
+            InlineKeyboardButton(text="ℹ️ Информация", callback_data="roul_info"),
+            InlineKeyboardButton(text="🎲 Крутить рулетку", callback_data="roul_spin")
+        ]
     ]
     return InlineKeyboardMarkup(inline_keyboard=kb)
 
 @router.message(Command("roulette"))
 async def cmd_roulette(message: Message):
-    args = message.text.split()
     user_id = message.from_user.id
-    
-    # Если ставка не указана, ставим стандартную по умолчанию (например, 10,000)
-    bet = float(args[1]) if len(args) > 1 and args[1].replace('.', '', 1).isdigit() else 10000.0
-    
-    balance = await get_user_balance(user_id)
-    if balance < bet:
-        await message.answer(f"❌ Недостаточно средств для ставки {fmt(bet)} 🪙! Баланс: {fmt(balance)} 🪙")
-        return
-
-    # Инициализируем сессию рулетки для пользователя
-    roulette_sessions[user_id] = {'stake': bet, 'bets': set()}
+    roulette_sessions[user_id] = {'stake': 1000.0, 'bets': set()}
 
     text = (
-        f"🎡 **Рулетка SpadeKing**\n"
-        f"💵 Ставка на позицию: **{fmt(bet)} монет**\n"
-        f"📌 Выберите одну или несколько позиций для ставки на игровом поле ниже:"
+        f"🎡 **Реальная рулетка SpadeKing**\n\n"
+        f"📌 Настройте сумму ставки кнопками `➖` / `➕` и выберите позиции на игровом поле:"
     )
     await message.answer(text, reply_markup=get_roulette_keyboard(user_id), parse_mode="Markdown")
+
+@router.callback_query(F.data.in_({"roul_stake_up", "roul_stake_down"}))
+async def cb_roul_stake_change(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    if user_id not in roulette_sessions:
+        roulette_sessions[user_id] = {'stake': 1000.0, 'bets': set()}
+    
+    current_stake = roulette_sessions[user_id]['stake']
+    if callback.data == "roul_stake_up":
+        current_stake += 1000.0
+    else:
+        current_stake = max(100.0, current_stake - 1000.0)
+    
+    roulette_sessions[user_id]['stake'] = current_stake
+    try:
+        await callback.message.edit_reply_markup(reply_markup=get_roulette_keyboard(user_id))
+    except Exception:
+        pass
+    await callback.answer()
+
+@router.callback_query(F.data == "roul_noop")
+async def cb_roul_noop(callback: CallbackQuery):
+    await callback.answer("Используйте кнопки ➖ и ➕ для изменения суммы ставки.")
 
 @router.callback_query(F.data.startswith("roul_toggle:"))
 async def cb_roul_toggle(callback: CallbackQuery):
     user_id = callback.from_user.id
     if user_id not in roulette_sessions:
-        roulette_sessions[user_id] = {'stake': 10000.0, 'bets': set()}
+        roulette_sessions[user_id] = {'stake': 1000.0, 'bets': set()}
     
     key = callback.data.split(":")[1]
     bets = roulette_sessions[user_id]['bets']
@@ -376,12 +376,13 @@ async def cb_roul_toggle(callback: CallbackQuery):
 @router.callback_query(F.data == "roul_info")
 async def cb_roul_info(callback: CallbackQuery):
     info_text = (
-        "ℹ️ **Информация о множителях рулетки:**\n\n"
-        "• Красное / Черное — **x2**\n"
-        "• 1-18 / 19-36 — **x2**\n"
-        "• Дюжины (1-12, 13-24, 25-36) — **x3**\n"
-        "• Колонки (1, 2, 3) — **x3**\n"
-        "• Зеро [0] — **x35**"
+        "ℹ️ **Правила и множители рулетки:**\n\n"
+        "• Красное / Черное — множитель **x2**\n"
+        "• 1-18 / 19-36 — множитель **x2**\n"
+        "• Дюжины (1-12, 13-24, 25-36) — множитель **x3**\n"
+        "• Колонки (1, 2, 3) — множитель **x3**\n"
+        "• Зеро [0] — множитель **x35**\n\n"
+        "📌 При ставке на несколько позиций проигравшие деньги сгорают, а выигрыш начисляется по победным позициям!"
     )
     await callback.answer(info_text, show_alert=True)
 
@@ -400,13 +401,11 @@ async def cb_roul_spin(callback: CallbackQuery):
 
     balance = await get_user_balance(user_id)
     if balance < total_stake:
-        await callback.answer(f"❌ Недостаточно средств на все позиции! Нужно: {fmt(total_stake)} 🪙", show_alert=True)
+        await callback.answer(f"❌ Недостаточно средств! Нужно: {fmt(total_stake)} 🪙", show_alert=True)
         return
 
-    # Списываем общую ставку
     await update_user_balance_by_id(user_id, -total_stake)
 
-    # Крутим рулетку (0 - 36)
     num = random.randint(0, 36)
     red_set = {1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36}
     color = "zero" if num == 0 else ("red" if num in red_set else "black")
@@ -438,17 +437,16 @@ async def cb_roul_spin(callback: CallbackQuery):
         res_text = (
             f"🎡 Рулетка остановилась на числе **{num}** ({color.upper()})!\n"
             f"🎉 Вы успешно забрали выигрыш\n"
-            f"+{fmt(total_win)} 🪙!\n"
-            f"💰 Баланс: {fmt(new_bal)} 🪙"
+            f"+{fmt_blue(total_win)}!\n"
+            f"💰 Баланс: {fmt_blue(new_bal)}"
         )
     else:
         res_text = (
             f"🎡 Рулетка остановилась на числе **{num}** ({color.upper()}).\n"
-            f"😢 Все ваши ставки проиграли.\n"
-            f"💰 Баланс: {fmt(new_bal)} 🪙"
+            f"😢 Все ваши ставки на сумму {fmt(total_stake)} 🪙 сгорели.\n"
+            f"💰 Баланс: {fmt_blue(new_bal)}"
         )
 
-    # Очищаем сессию
     if user_id in roulette_sessions:
         del roulette_sessions[user_id]
 
@@ -469,9 +467,9 @@ async def cmd_coin(message: Message):
     if win > 0: await update_user_balance_by_id(user_id, win)
     new_bal = await get_user_balance(user_id)
     if win > 0:
-        await message.answer(f"🪙 Выпал {'Орел' if res_coin=='heads' else 'Решка'}. Вы выиграли +{fmt(win)} 🪙!\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"🪙 Выпал {'Орел' if res_coin=='heads' else 'Решка'}. Вы выиграли +{fmt_blue(win)}!\n💰 Баланс: {fmt_blue(new_bal)}")
     else:
-        await message.answer(f"🪙 Выпал {'Орел' if res_coin=='heads' else 'Решка'}. Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"🪙 Выпал {'Орел' if res_coin=='heads' else 'Решка'}. Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt_blue(new_bal)}")
 
 @router.message(Command("hilo"))
 async def cmd_hilo(message: Message):
@@ -487,9 +485,9 @@ async def cmd_hilo(message: Message):
     if win > 0: await update_user_balance_by_id(user_id, win)
     new_bal = await get_user_balance(user_id)
     if win > 0:
-        await message.answer(f"📈 Карта: {n} (прошлая: {p}). Вы выиграли +{fmt(win)} 🪙!\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"📈 Карта: {n} (прошлая: {p}). Вы выиграли +{fmt_blue(win)}!\n💰 Баланс: {fmt_blue(new_bal)}")
     else:
-        await message.answer(f"📈 Карта: {n} (прошлая: {p}). Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"📈 Карта: {n} (прошлая: {p}). Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt_blue(new_bal)}")
 
 async def process_sport(message: Message, emoji: str, cond):
     args = message.text.split()
@@ -507,9 +505,9 @@ async def process_sport(message: Message, emoji: str, cond):
     if win > 0: await update_user_balance_by_id(user_id, win)
     new_bal = await get_user_balance(user_id)
     if win > 0:
-        await message.answer(f"{emoji} Результат: {val}. Вы успешно забрали выигрыш +{fmt(win)} 🪙!\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"{emoji} Результат: {val}. Вы успешно забрали выигрыш +{fmt_blue(win)}!\n💰 Баланс: {fmt_blue(new_bal)}")
     else:
-        await message.answer(f"{emoji} Результат: {val}. Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"{emoji} Результат: {val}. Проигрыш {fmt(bet)} 🪙.\n💰 Баланс: {fmt_blue(new_bal)}")
 
 @router.message(Command("darts"))
 async def cmd_darts(message: Message): await process_sport(message, "🎯", lambda v: 5 if v == 6 else (1.5 if v >= 4 else 0))
@@ -547,7 +545,7 @@ async def admin_actions_handler(message: Message):
             f"👤 **Информация об игроке:**\n"
             f"• ID: `{target_id}`\n"
             f"• Юзернейм: {target_name}\n"
-            f"• Баланс: {fmt(target_user.get('balance', 0))} 🪙\n"
+            f"• Баланс: {fmt_blue(target_user.get('balance', 0))}\n"
             f"• Сообщений отправлено: {target_user.get('message_count', 0)}"
         )
         await message.answer(info, parse_mode="Markdown")
@@ -565,13 +563,13 @@ async def admin_actions_handler(message: Message):
 
     if cmd == "addbalance":
         new_bal = await update_user_balance_by_id(target_id, amount)
-        await message.answer(f"✅ Баланс игрока {target_name} увеличен на +{fmt(amount)} 🪙. Новый баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"✅ Баланс игрока {target_name} увеличен на +{fmt_blue(amount)}. Новый баланс: {fmt_blue(new_bal)}")
     elif cmd == "subbalance":
         new_bal = await update_user_balance_by_id(target_id, -amount)
-        await message.answer(f"✅ Списано {fmt(amount)} 🪙 у игрока {target_name}. Новый баланс: {fmt(new_bal)} 🪙")
+        await message.answer(f"✅ Списано {fmt_blue(amount)} у игрока {target_name}. Новый баланс: {fmt_blue(new_bal)}")
     elif cmd == "setbalance":
         supabase.table('users').update({'balance': amount}).eq('user_id', target_id).execute()
-        await message.answer(f"✅ Баланс игрока {target_name} установлен ровно на {fmt(amount)} 🪙")
+        await message.answer(f"✅ Баланс игрока {target_name} установлен ровно на {fmt_blue(amount)}")
 
 @router.message(Command("stats"))
 async def cmd_stats(message: Message):
@@ -595,11 +593,23 @@ async def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     
     bot = Bot(token=TOKEN)
-    dp = Dispatcher()
     
+    # Регистрация меню команд для кнопки "/" в интерфейсе Telegram
+    await bot.set_my_commands([
+        BotCommand(command="dice", description="🎲 Кости (ставка и числа 1-6)"),
+        BotCommand(command="slots", description="🎰 Слоты (ставка)"),
+        BotCommand(command="roulette", description="🎡 Реальная рулетка (меню ставок)"),
+        BotCommand(command="coin", description="🪙 Монетка (ставка и орёл/решка)"),
+        BotCommand(command="hilo", description="📈 Хай-Ло (ставка и high/low)"),
+        BotCommand(command="darts", description="🎯 Дартс (ставка)"),
+        BotCommand(command="basketball", description="🏀 Баскетбол (ставка)"),
+        BotCommand(command="football", description="⚽ Футбол (ставка)"),
+        BotCommand(command="bowling", description="🎳 Боулинг (ставка)"),
+    ])
+
+    dp = Dispatcher()
     dp.message.middleware(DatabaseMiddleware())
     dp.callback_query.middleware(DatabaseMiddleware())
-    
     dp.include_router(router)
 
     app = web.Application()
