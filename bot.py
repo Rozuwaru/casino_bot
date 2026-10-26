@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import sqlite3
 from aiogram import Bot, Dispatcher, Router
 from aiogram.filters import CommandStart
@@ -14,10 +15,10 @@ from aiogram.types import (
 )
 from aiohttp import web
 
-# ЗАМЕНИ НА СВОЙ ТОКЕН ОТ BOTFATHER
-TOKEN = "8752641180:AAEFfiJn6ykMK_ymFE4hc6kHKBOzgb9YWK8"
+# Твой токен от BotFather
+TOKEN = "8752641180:AAEFFiJn6yKMK_ymFE4hc6kHKBOzgb9YWK8"
 
-# ЗАМЕНИ НА СВОЙ URL С RENDER (например: https://my-casino-bot.onrender.com/webapp)
+# Ссылка на твоё приложение на Render с /webapp на конце
 WEBAPP_URL = "https://casino-bot-y2qo.onrender.com/webapp"
 
 # --- БАЗА ДАННЫХ ---
@@ -40,7 +41,7 @@ def add_user(user_id: int):
     conn.commit()
     conn.close()
 
-# --- ИНТЕРАКТИВНОЕ ОКНО КАЗИНО (MINI APP HTML/CSS/JS) ---
+# --- ИНТЕРАКТИВНОЕ ОКНО КАЗИНО (ВСЕ 7 ИГР) ---
 WEBAPP_HTML = """
 <!DOCTYPE html>
 <html lang="ru">
@@ -79,7 +80,6 @@ WEBAPP_HTML = """
             align-items: center;
         }
 
-        /* HEADER & BALANCE */
         .header {
             width: 100%;
             max-width: 440px;
@@ -117,13 +117,11 @@ WEBAPP_HTML = """
             gap: 6px;
         }
 
-        /* CONTAINER */
         .container {
             width: 100%;
             max-width: 440px;
         }
 
-        /* NAVIGATION BUTTONS */
         .back-btn {
             background: rgba(255, 255, 255, 0.08);
             color: var(--text-main);
@@ -141,7 +139,6 @@ WEBAPP_HTML = """
 
         .back-btn:active { transform: scale(0.95); }
 
-        /* GAMES LOBBY GRID */
         .lobby-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -183,7 +180,6 @@ WEBAPP_HTML = """
             color: var(--text-dim);
         }
 
-        /* GAME SCREEN WRAPPER */
         .game-screen {
             display: none;
             background: var(--card-bg);
@@ -204,7 +200,6 @@ WEBAPP_HTML = """
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* INPUTS & BUTTONS */
         .bet-control {
             margin: 16px 0;
             display: flex;
@@ -249,7 +244,6 @@ WEBAPP_HTML = """
             font-size: 15px;
         }
 
-        /* SLOTS ANIMATION */
         .slots-reels {
             display: flex;
             justify-content: center;
@@ -270,7 +264,6 @@ WEBAPP_HTML = """
             border-radius: 10px;
         }
 
-        /* MINES GRID */
         .mines-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -294,7 +287,6 @@ WEBAPP_HTML = """
         .mine-tile.gem { background: rgba(42, 157, 143, 0.4); border: 1px solid var(--accent-green); }
         .mine-tile.bomb { background: rgba(230, 57, 70, 0.4); border: 1px solid var(--accent-red); }
 
-        /* CRASH CANVAS */
         .crash-display {
             background: #000;
             height: 140px;
@@ -309,7 +301,6 @@ WEBAPP_HTML = """
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* BLACKJACK */
         .cards-area {
             display: flex;
             justify-content: space-around;
@@ -321,7 +312,6 @@ WEBAPP_HTML = """
         .hand { font-size: 14px; }
         .hand-cards { font-size: 22px; font-weight: bold; margin-top: 4px; }
 
-        /* ROULETTE & DICE */
         .flex-btns {
             display: flex;
             gap: 8px;
@@ -606,10 +596,10 @@ WEBAPP_HTML = """
                 let mult = selectedRoulette === 'zero' ? 14 : 2;
                 let win = bet * mult;
                 updateBalance(win);
-                resBox.innerText = ` Выпало ${num} (${color.toUpperCase()})! Выигрыш +${win}`;
+                resBox.innerText = `🎯 Выпало ${num} (${color.toUpperCase()})! Выигрыш +${win}`;
                 triggerHaptic('success');
             } else {
-                resBox.innerText = ` Выпало ${num} (${color.toUpperCase()}). Мимо!`;
+                resBox.innerText = `❌ Выпало ${num} (${color.toUpperCase()}). Мимо!`;
                 triggerHaptic('error');
             }
         }
@@ -643,16 +633,16 @@ WEBAPP_HTML = """
             if (!bjState.playing) return;
             bjState.player.push(getCard());
             renderBJ();
-            if (sumHand(bjState.player) > 21) endBJ(false, 'Перебор!');
+            if (sumHand(bjState.player) > 21) endBJ(false, '💥 Перебор!');
         }
 
         function bjStand() {
             if (!bjState.playing) return;
             while(sumHand(bjState.dealer) < 17) bjState.dealer.push(getCard());
             let p = sumHand(bjState.player), d = sumHand(bjState.dealer);
-            if (d > 21 || p > d) endBJ(true, 'Победа!');
-            else if (p === d) endBJ('draw', 'Ничья!');
-            else endBJ(false, 'Дилер выиграл!');
+            if (d > 21 || p > d) endBJ(true, '🎉 Победа!');
+            else if (p === d) endBJ('draw', '🤝 Ничья!');
+            else endBJ(false, '😢 Дилер выиграл!');
         }
 
         function endBJ(win, msg) {
@@ -694,7 +684,7 @@ WEBAPP_HTML = """
             }
             document.getElementById('minesStartBtn').style.display = 'none';
             document.getElementById('minesCashoutBtn').style.display = 'block';
-            document.getElementById('minesResult').innerText = 'Ищите кристаллы!';
+            document.getElementById('minesResult').innerText = '💎 Ищите кристаллы!';
         }
 
         function clickMine(idx, tile) {
@@ -712,7 +702,7 @@ WEBAPP_HTML = """
                 minesState.opened++;
                 minesState.mult += 0.3;
                 let currentWin = Math.floor(minesState.bet * minesState.mult);
-                document.getElementById('minesResult').innerText = `Профит: ${currentWin} (x${minesState.mult.toFixed(2)})`;
+                document.getElementById('minesResult').innerText = `💰 Профит: ${currentWin} (x${minesState.mult.toFixed(2)})`;
                 triggerHaptic();
             }
         }
@@ -749,7 +739,7 @@ WEBAPP_HTML = """
                 clearInterval(crashInterval);
                 let win = Math.floor(bet * mult);
                 updateBalance(win);
-                document.getElementById('crashResult').innerText = ` Успел! Выиграл +${win}`;
+                document.getElementById('crashResult').innerText = `🎉 Успел! Выиграл +${win}`;
                 btn.innerText = 'Старт';
                 btn.onclick = startCrash;
                 triggerHaptic('success');
@@ -762,7 +752,7 @@ WEBAPP_HTML = """
                     active = false;
                     clearInterval(crashInterval);
                     display.innerText = '💥 CRASH!';
-                    document.getElementById('crashResult').innerText = `Увы, улетел на ${crashPoint}x`;
+                    document.getElementById('crashResult').innerText = `😢 Увы, улетел на ${crashPoint}x`;
                     btn.innerText = 'Старт';
                     btn.onclick = startCrash;
                     triggerHaptic('error');
@@ -813,10 +803,10 @@ WEBAPP_HTML = """
             let res = document.getElementById('coinResult');
             if(resVal === selectedCoin) {
                 updateBalance(bet * 2);
-                res.innerText = ` Выпало: ${resVal === 'heads' ? 'ОРЕЛ' : 'РЕШКА'}! Выигрыш +${bet*2}`;
+                res.innerText = `🪙 Выпало: ${resVal === 'heads' ? 'ОРЕЛ' : 'РЕШКА'}! Выигрыш +${bet*2}`;
                 triggerHaptic('success');
             } else {
-                res.innerText = ` Выпало: ${resVal === 'heads' ? 'ОРЕЛ' : 'РЕШКА'}! Проиграл`;
+                res.innerText = `🪙 Выпало: ${resVal === 'heads' ? 'ОРЕЛ' : 'РЕШКА'}! Проиграл`;
                 triggerHaptic('error');
             }
         }
@@ -854,7 +844,7 @@ async def inline_handler(query: InlineQuery):
         InlineQueryResultArticle(
             id="casino_app",
             title="🎰 Casino Royale (Игровой Зал)",
-            description="Слоты, Рулетка, Минное поле, Краш, Блэкджек и Кости в одном окне",
+            description="Слоты, Рулетка, Минное поле, Краш, Блэкджек, Кости и Монетка",
             input_message_content=InputTextMessageContent(
                 message_text="🎰 Я открыл игровой зал казино! Присоединяйся к игре."
             ),
@@ -875,14 +865,17 @@ async def main():
     dp.include_router(router)
 
     app = web.Application()
+    app.router.add_get("/", handle_webapp)
     app.router.add_get("/webapp", handle_webapp)
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", 10000)
+    
+    port = int(os.environ.get("PORT", 10000))
+    site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
 
-    print("Бот и веб-сервер успешно запущены!")
+    print(f"Бот и веб-сервер успешно запущены на порту {port}!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
