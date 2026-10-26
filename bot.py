@@ -2,42 +2,87 @@ import asyncio
 import logging
 import os
 import random
-from aiogram import Bot, Dispatcher, Router, F
+from aiogram import Bot, Dispatcher, Router, F, BaseMiddleware
 from aiogram.filters import CommandStart, Command
 from aiogram.types import (
     Message,
     CallbackQuery,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
+    TelegramObject,
 )
+from typing import Callable, Dict, Any, Awaitable
 from aiohttp import web
 from supabase import create_client, Client
 
-# Настройки бота и Supabase
+# --- КОНФИГУРАЦИЯ ---
 TOKEN = "8752641180:AAET94FACuNdO26CCdFHFyv1vJhSiv3O7F4"
 SUPABASE_URL = "https://lnskcqunuaewqcsvcpvr.supabase.co"
 SUPABASE_KEY = "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2tjcXVudWFld3Fjc3ZjcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzE2MjQsImV4cCI6MjEwODYwNzYyNH0.g0F_E6hIOeholtABi_WsbMzqT4H-49wTH5XYXAk_0Nc"
 
-# Зашитый ID администратора (замените 123456789 на ваш настоящий Telegram ID)
-ADMIN_ID = 123456789
+# Ваш админский юзернейм (установлен из вашего скриншота)
+ADMIN_USERNAME = "p0tat0777"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 router = Router()
 
 def fmt(val: float) -> str:
-    """Форматирование чисел с запятыми для красоты (например, 14,761,514)"""
+    """Форматирование чисел с разделителями (например, 1,000,000)"""
     return f"{int(val):,}"
+
+def is_admin(user) -> bool:
+    """Проверка прав администратора по Telegram юзернейму"""
+    if not user.username:
+        return False
+    return user.username.lower() == ADMIN_USERNAME.lower()
+
+# --- MIDDLEWARE ДЛЯ УЧЕТА ПОЛЬЗОВАТЕЛЕЙ И СООБЩЕНИЙ В SUPABASE ---
+class DatabaseMiddleware(BaseMiddleware):
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: Dict[str, Any]
+    ) -> Any:
+        user = None
+        if isinstance(event, Message) and event.from_user:
+            user = event.from_user
+        elif isinstance(event, CallbackQuery) and event.from_user:
+            user = event.from_user
+
+        if user:
+            user_id = user.id
+            username = user.username or user.full_name
+            try:
+                res = supabase.table('users').select('*').eq('user_id', user_id).execute()
+                if res.data and len(res.data) > 0:
+                    current_msgs = res.data[0].get('message_count', 0) or 0
+                    # Обновляем юзернейм и увеличиваем счетчик сообщений на 1
+                    supabase.table('users').update({
+                        'username': username,
+                        'message_count': current_msgs + 1
+                    }).eq('user_id', user_id).execute()
+                else:
+                    # Создаем нового пользователя в базе
+                    supabase.table('users').insert({
+                        'user_id': user_id,
+                        'username': username,
+                        'balance': 1000000.0,
+                        'message_count': 1
+                    }).execute()
+            except Exception as e:
+                logging.error(f"Middleware DB Error: {e}")
+
+        return await handler(event, data)
 
 async def get_user_balance(user_id: int) -> float:
     try:
         response = supabase.table('users').select('balance').eq('user_id', user_id).execute()
         if response.data and len(response.data) > 0:
             return float(response.data[0]['balance'])
-        else:
-            supabase.table('users').insert({'user_id': user_id, 'balance': 1000000.0}).execute()
-            return 1000000.0
+        return 1000000.0
     except Exception as e:
-        logging.error(f"DB Error: {e}")
+        logging.error(f"Get Balance Error: {e}")
         return 1000000.0
 
 async def update_user_balance(user_id: int, amount: float) -> float:
@@ -46,16 +91,14 @@ async def update_user_balance(user_id: int, amount: float) -> float:
     try:
         supabase.table('users').update({'balance': new_balance}).eq('user_id', user_id).execute()
     except Exception as e:
-        logging.error(f"DB Update Error: {e}")
+        logging.error(f"Update Balance Error: {e}")
     return new_balance
 
-# --- ГЛАВНОЕ МЕНЮ И СПИСОК ИГР ---
+# --- ГЛАВНОЕ МЕНЮ ---
 @router.message(CommandStart())
 async def cmd_start(message: Message):
     user = message.from_user
-    user_id = user.id
-    balance = await get_user_balance(user_id)
-    
+    balance = await get_user_balance(user.id)
     username_display = f"@{user.username}" if user.username else user.full_name
     
     text = (
@@ -70,9 +113,7 @@ async def cmd_start(message: Message):
 @router.callback_query(F.data == "main_menu")
 async def cb_main_menu(callback: CallbackQuery):
     user = callback.from_user
-    user_id = user.id
-    balance = await get_user_balance(user_id)
-    
+    balance = await get_user_balance(user.id)
     username_display = f"@{user.username}" if user.username else user.full_name
     
     text = (
@@ -90,7 +131,7 @@ async def cb_games_list(callback: CallbackQuery):
     text = (
         "🎮 **Список игр и команды для запуска:**\n\n"
         "🎲 **Кости:** `/dice <ставка> <числа...>`\n"
-        "   *(Пример: `/dice 100000 3 5` — можно ставить на несколько чисел с разным коэффициентом!)*\n\n"
+        "   *(Пример: `/dice 100000 3 5` — ставки на несколько чисел с коэффициентом!)*\n\n"
         "🎰 **Слоты:** `/slots <ставка>`\n"
         "   *(Пример: `/slots 50000`)*\n\n"
         "🎡 **Рулетка:** `/roulette <ставка> <red / black / zero / 0-36>`\n"
@@ -102,8 +143,7 @@ async def cb_games_list(callback: CallbackQuery):
         "🎯 **Дартс:** `/darts <ставка>`\n"
         "🏀 **Баскетбол:** `/basketball <ставка>`\n"
         "⚽ **Футбол:** `/football <ставка>`\n"
-        "🎳 **Боулинг:** `/bowling <ставка>`\n"
-        "💣 **Мины:** `/mines <ставка>`"
+        "🎳 **Боулинг:** `/bowling <ставка>`"
     )
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="⬅️ Назад в меню", callback_data="main_menu")]
@@ -111,7 +151,8 @@ async def cb_games_list(callback: CallbackQuery):
     await callback.message.edit_text(text, reply_markup=kb, parse_mode="Markdown")
     await callback.answer()
 
-# --- ИГРА 1: КОСТИ С МУЛЬТИ-СТАВКАМИ ---
+# --- ИГРОВЫЕ КОМАНДЫ ---
+
 @router.message(Command("dice"))
 async def cmd_dice(message: Message):
     args = message.text.split()
@@ -143,7 +184,6 @@ async def cmd_dice(message: Message):
     await asyncio.sleep(3)
 
     if val in numbers:
-        # Коэффициент зависит от количества выбранных чисел (чем меньше чисел, тем выше коэффициент)
         mult = round(5.8 / len(numbers), 2)
         win = bet * mult
         await update_user_balance(user_id, win)
@@ -153,7 +193,6 @@ async def cmd_dice(message: Message):
         new_bal = await get_user_balance(user_id)
         await message.answer(f"🎲 Выпало {val}. Проигрыш {fmt(bet)} монет. 💸 (Баланс: {fmt(new_bal)})")
 
-# --- ИГРА 2: СЛОТЫ ---
 @router.message(Command("slots"))
 async def cmd_slots(message: Message):
     args = message.text.split()
@@ -168,7 +207,7 @@ async def cmd_slots(message: Message):
     user_id = message.from_user.id
     balance = await get_user_balance(user_id)
     if balance < bet:
-        await message.answer(f"❌ Недостаточно средств!")
+        await message.answer("❌ Недостаточно средств!")
         return
 
     await update_user_balance(user_id, -bet)
@@ -192,7 +231,6 @@ async def cmd_slots(message: Message):
     new_bal = await get_user_balance(user_id)
     await message.answer(f"{res} 💸 (Баланс: {fmt(new_bal)})")
 
-# --- ИГРА 3: РУЛЕТКА ---
 @router.message(Command("roulette"))
 async def cmd_roulette(message: Message):
     args = message.text.split()
@@ -236,7 +274,6 @@ async def cmd_roulette(message: Message):
     new_bal = await get_user_balance(user_id)
     await message.answer(f"{text} 💸 (Баланс: {fmt(new_bal)})")
 
-# --- ИГРА 4: МОНЕТКА ---
 @router.message(Command("coin"))
 async def cmd_coin(message: Message):
     args = message.text.split()
@@ -268,7 +305,6 @@ async def cmd_coin(message: Message):
     new_bal = await get_user_balance(user_id)
     await message.answer(f"{text} 💸 (Баланс: {fmt(new_bal)})")
 
-# --- ИГРА 5: ХАЙ-ЛО ---
 @router.message(Command("hilo"))
 async def cmd_hilo(message: Message):
     args = message.text.split()
@@ -307,7 +343,6 @@ async def cmd_hilo(message: Message):
     new_bal = await get_user_balance(user_id)
     await message.answer(f"{text} 💸 (Баланс: {fmt(new_bal)})")
 
-# --- СПОРТИВНЫЕ ИГРЫ (ДАРТС, БАСКЕТБОЛ, ФУТБОЛ, БОУЛИНГ) ---
 async def process_sport_game(message: Message, emoji: str, win_condition):
     args = message.text.split()
     if len(args) < 2:
@@ -356,14 +391,10 @@ async def cmd_football(message: Message):
 async def cmd_bowling(message: Message):
     await process_sport_game(message, "🎳", lambda v: 4 if v == 6 else (1.5 if v >= 4 else 0))
 
-@router.message(Command("mines"))
-async def cmd_mines(message: Message):
-    await message.answer("💣 Игра 'Мины' запускается через меню или текстовый режим. Введите сумму ставки через меню игр.")
-
-# --- АДМИН-ПАНЕЛЬ ---
+# --- РАСШИРЕННАЯ АДМИН-ПАНЕЛЬ (УПРАВЛЕНИЕ ЧЕРЕЗ ЮЗЕРНЕЙМ) ---
 @router.message(Command("admin"))
 async def cmd_admin(message: Message):
-    if message.from_user.id != ADMIN_ID:
+    if not is_admin(message.from_user):
         await message.answer("❌ У вас нет доступа к админ-панели.")
         return
     
@@ -372,13 +403,15 @@ async def cmd_admin(message: Message):
         "Доступные команды:\n"
         "• `/addbalance <user_id> <сумма>` — выдать монеты\n"
         "• `/subbalance <user_id> <сумма>` — забрать монеты\n"
-        "• `/setbalance <user_id> <сумма>` — установить точный баланс"
+        "• `/setbalance <user_id> <сумма>` — установить точный баланс\n"
+        "• `/userinfo <user_id>` — узнать информацию об игроке\n"
+        "• `/stats` — общая статистика бота"
     )
     await message.answer(text, parse_mode="Markdown")
 
 @router.message(Command("addbalance"))
 async def cmd_add_balance(message: Message):
-    if message.from_user.id != ADMIN_ID:
+    if not is_admin(message.from_user):
         return
     args = message.text.split()
     if len(args) < 3:
@@ -396,7 +429,7 @@ async def cmd_add_balance(message: Message):
 
 @router.message(Command("subbalance"))
 async def cmd_sub_balance(message: Message):
-    if message.from_user.id != ADMIN_ID:
+    if not is_admin(message.from_user):
         return
     args = message.text.split()
     if len(args) < 3:
@@ -414,7 +447,7 @@ async def cmd_sub_balance(message: Message):
 
 @router.message(Command("setbalance"))
 async def cmd_set_balance(message: Message):
-    if message.from_user.id != ADMIN_ID:
+    if not is_admin(message.from_user):
         return
     args = message.text.split()
     if len(args) < 3:
@@ -433,6 +466,57 @@ async def cmd_set_balance(message: Message):
     except Exception as e:
         await message.answer(f"❌ Ошибка базы данных: {e}")
 
+@router.message(Command("userinfo"))
+async def cmd_user_info(message: Message):
+    if not is_admin(message.from_user):
+        return
+    args = message.text.split()
+    if len(args) < 2:
+        await message.answer("⚠️ Использование: `/userinfo <user_id>`", parse_mode="Markdown")
+        return
+    try:
+        target_id = int(args[1])
+    except ValueError:
+        await message.answer("⚠️ Неверный формат ID.")
+        return
+
+    try:
+        res = supabase.table('users').select('*').eq('user_id', target_id).execute()
+        if res.data and len(res.data) > 0:
+            u = res.data[0]
+            info = (
+                f"👤 **Информация о пользователе:**\n"
+                f"• ID: `{u.get('user_id')}`\n"
+                f"• Имя/Юзернейм: @{u.get('username')}\n"
+                f"• Баланс: {fmt(u.get('balance', 0))} монет\n"
+                f"• Отправлено сообщений: {u.get('message_count', 0)}"
+            )
+            await message.answer(info, parse_mode="Markdown")
+        else:
+            await message.answer("❌ Пользователь не найден в базе данных.")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+
+@router.message(Command("stats"))
+async def cmd_stats(message: Message):
+    if not is_admin(message.from_user):
+        return
+    try:
+        res = supabase.table('users').select('user_id, message_count').execute()
+        if res.data:
+            total_users = len(res.data)
+            total_messages = sum(u.get('message_count', 0) for u in res.data)
+            await message.answer(
+                f"📊 **Статистика казино:**\n\n"
+                f"• Всего зарегистрировано игроков: `{total_users}`\n"
+                f"• Всего отправлено сообщений: `{fmt(total_messages)}`",
+                parse_mode="Markdown"
+            )
+        else:
+            await message.answer("📊 База данных пуста.")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+
 # --- ЗАПУСК ---
 async def handle_ping(request: web.Request) -> web.Response:
     return web.Response(text="Bot is active", status=200)
@@ -442,6 +526,11 @@ async def main():
     
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
+    
+    # Регистрация middleware для автоматического сохранения/обновления игроков и подсчета сообщений
+    dp.message.middleware(DatabaseMiddleware())
+    dp.callback_query.middleware(DatabaseMiddleware())
+    
     dp.include_router(router)
 
     app = web.Application()
