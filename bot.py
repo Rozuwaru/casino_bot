@@ -20,12 +20,11 @@ TOKEN = "8752641180:AAET94FACuNdO26CCdFHFyv1vJhSiv3O7F4"
 # Ссылка на веб-приложение на Render
 WEBAPP_URL = "https://casino-bot-y2qo.onrender.com/webapp"
 
-# --- НАСТРОЙКИ SUPABASE API (БЕЗ ПАРОЛЯ) ---
-# Замени на свои данные из Supabase Settings -> API
+# Настройки Supabase
 SUPABASE_URL = "https://lnskcqunuaewqcsvcpvr.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2tjcXVudWFld3Fjc3ZjcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzE2MjQsImV4cCI6MjEwODYwNzYyNH0.g0F_E6hIOeholtABi_WsbMzqT4H-49wTH5XYXAk_0Nc"
 
-# --- HTML / CSS / JS ИНТЕРФЕЙС (12 ИГР + АНИМАЦИИ + SUPABASE) ---
+# --- HTML / CSS / JS ИНТЕРФЕЙС (12 ИГР + SUPABASE CDN) ---
 WEBAPP_HTML = f"""
 <!DOCTYPE html>
 <html lang="ru">
@@ -103,7 +102,7 @@ WEBAPP_HTML = f"""
             font-size: 15px;
             box-shadow: 0 0 15px rgba(46, 213, 115, 0.15);
             transition: transform 0.2s ease;
-        }
+        }}
 
         .balance-box.pulse {{ transform: scale(1.1); }}
 
@@ -122,7 +121,7 @@ WEBAPP_HTML = f"""
             align-items: center;
             gap: 8px;
             transition: all 0.2s ease;
-        }
+        }}
         .back-btn:active {{ transform: scale(0.95); background: var(--card-hover); }}
 
         .lobby-grid {{
@@ -130,7 +129,7 @@ WEBAPP_HTML = f"""
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             animation: fadeIn 0.4s ease;
-        }
+        }}
 
         .game-card {{
             background: var(--card-bg);
@@ -142,7 +141,7 @@ WEBAPP_HTML = f"""
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
-        }
+        }}
 
         .game-card:hover, .game-card:active {{
             transform: translateY(-5px);
@@ -163,7 +162,7 @@ WEBAPP_HTML = f"""
             box-shadow: 0 15px 40px rgba(0,0,0,0.6);
             text-align: center;
             animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        }}
         .game-screen.active {{ display: block; }}
 
         @keyframes fadeIn {{ from {{ opacity: 0; transform: scale(0.95); }} to {{ opacity: 1; transform: scale(1); }} }}
@@ -179,12 +178,12 @@ WEBAPP_HTML = f"""
             padding: 8px 12px;
             border-radius: 14px;
             border: 1px solid var(--border-color);
-        }
+        }}
         .bet-control label {{ font-size: 13px; color: var(--text-dim); font-weight: 600; }}
         .bet-input {{
             width: 90px; background: transparent; border: none;
             color: var(--accent-gold); font-weight: 800; font-size: 18px; text-align: center; outline: none;
-        }
+        }}
 
         .action-btn {{
             background: linear-gradient(135deg, #f7b733, #fc4a1a);
@@ -192,7 +191,7 @@ WEBAPP_HTML = f"""
             font-size: 16px; font-weight: 800; border-radius: 16px; cursor: pointer;
             transition: all 0.2s ease; box-shadow: 0 6px 20px rgba(247, 183, 51, 0.3);
             text-transform: uppercase; letter-spacing: 0.5px;
-        }
+        }}
         .action-btn:active {{ transform: scale(0.97); }}
 
         .result-box {{ margin-top: 16px; font-weight: 700; min-height: 28px; font-size: 16px; }}
@@ -202,7 +201,7 @@ WEBAPP_HTML = f"""
             flex: 1; padding: 12px 8px; background: var(--card-hover);
             border: 1px solid var(--border-color); color: var(--text-main);
             border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;
-        }
+        }}
         .flex-btns button.selected {{
             border-color: var(--accent-gold); background: rgba(247, 183, 51, 0.15); color: var(--accent-gold);
         }}
@@ -231,7 +230,7 @@ WEBAPP_HTML = f"""
             border-radius: 50%; background: conic-gradient(#ff4757 0deg 90deg, #2ed573 90deg 180deg, #f7b733 180deg 270deg, #3742fa 270deg 360deg);
             border: 4px solid var(--accent-gold); box-shadow: 0 0 25px var(--accent-gold-glow);
             transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1);
-        }
+        }}
         .wheel-pointer {{
             position: absolute; top: -14px; left: calc(50% - 10px); width: 0; height: 0;
             border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #fff;
@@ -246,7 +245,6 @@ WEBAPP_HTML = f"""
     </div>
 
     <div class="container">
-        <!-- ЛОББИ (12 ИГР) -->
         <div id="lobby" class="lobby-grid">
             <div class="game-card" onclick="openGame('slots')"><span class="game-icon">🎰</span><div class="game-title">Слоты 777</div><div class="game-desc">Классика жанра</div></div>
             <div class="game-card" onclick="openGame('roulette')"><span class="game-icon">🎡</span><div class="game-title">Рулетка</div><div class="game-desc">Цвета и зеро</div></div>
@@ -262,7 +260,6 @@ WEBAPP_HTML = f"""
             <div class="game-card" onclick="openGame('scratch')"><span class="game-icon">🎫</span><div class="game-title">Скретч-карты</div><div class="game-desc">Стрирай и выигрывай</div></div>
         </div>
 
-        <!-- 1. СЛОТЫ -->
         <div id="game-slots" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎰 Слоты 777</h3>
@@ -274,7 +271,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="slotsResult"></div>
         </div>
 
-        <!-- 2. РУЛЕТКА -->
         <div id="game-roulette" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎡 Рулетка</h3>
@@ -288,7 +284,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="rouletteResult"></div>
         </div>
 
-        <!-- 3. БЛЭКДЖЕК -->
         <div id="game-blackjack" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🃏 Блэкджек 21</h3>
@@ -308,7 +303,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="bjResult"></div>
         </div>
 
-        <!-- 4. МИННОЕ ПОЛЕ -->
         <div id="game-mines" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>💣 Минное поле</h3>
@@ -319,7 +313,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="minesResult"></div>
         </div>
 
-        <!-- 5. КРАШ -->
         <div id="game-crash" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🚀 Краш X</h3>
@@ -329,7 +322,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="crashResult"></div>
         </div>
 
-        <!-- 6. КОСТИ -->
         <div id="game-dice" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎲 Кости</h3>
@@ -342,7 +334,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="diceResult"></div>
         </div>
 
-        <!-- 7. МОНЕТКА -->
         <div id="game-coin" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🪙 Монетка</h3>
@@ -355,7 +346,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="coinResult"></div>
         </div>
 
-        <!-- 8. ПЛИНКО -->
         <div id="game-plinko" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🔺 Плинко</h3>
@@ -371,7 +361,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="plinkoResult"></div>
         </div>
 
-        <!-- 9. ХАЙ-ЛО -->
         <div id="game-hilo" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>📈 Хай-Ло</h3>
@@ -384,7 +373,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="hiloResult">Угадайте карту</div>
         </div>
 
-        <!-- 10. КОЛЕСО ФОРТУНЫ -->
         <div id="game-wheel" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎯 Колесо Фортуны</h3>
@@ -397,7 +385,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="wheelResult"></div>
         </div>
 
-        <!-- 11. КЕНО -->
         <div id="game-keno" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🔢 Кено Лото</h3>
@@ -407,7 +394,6 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="kenoResult"></div>
         </div>
 
-        <!-- 12. СКРЕТЧ-КАРТЫ -->
         <div id="game-scratch" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎫 Скретч-карты</h3>
@@ -427,7 +413,6 @@ WEBAPP_HTML = f"""
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Подключение Supabase в клиентской части
         const supabaseUrl = "{SUPABASE_URL}";
         const supabaseKey = "{SUPABASE_KEY}";
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -475,19 +460,19 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        function showLobby() {
+        function showLobby() {{
             document.querySelectorAll('.game-screen').forEach(el => el.classList.remove('active'));
             document.getElementById('lobby').style.display = 'grid';
-        }
+        }}
 
-        function openGame(gameId) {
+        function openGame(gameId) {{
             triggerHaptic('light');
             document.getElementById('lobby').style.display = 'none';
-            document.getElementById(`game-${gameId}`).classList.add('active');
-        }
+            document.getElementById(`game-${{gameId}}`).classList.add('active');
+        }}
 
-        /* --- СЛОТЫ (С ПЛАВНЫМ ВРАЩЕНИЕМ) --- */
-        function playSlots() {
+        /* SLOTS */
+        function playSlots() {{
             let bet = parseInt(document.getElementById('slotsBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet);
@@ -497,13 +482,13 @@ WEBAPP_HTML = f"""
             let r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3');
             r1.classList.add('spinning'); r2.classList.add('spinning'); r3.classList.add('spinning');
 
-            let timer = setInterval(() => {
+            let timer = setInterval(() => {{
                 r1.innerText = items[Math.floor(Math.random() * items.length)];
                 r2.innerText = items[Math.floor(Math.random() * items.length)];
                 r3.innerText = items[Math.floor(Math.random() * items.length)];
-            }, 60);
+            }}, 60);
 
-            setTimeout(() => {
+            setTimeout(() => {{
                 clearInterval(timer);
                 r1.classList.remove('spinning'); r2.classList.remove('spinning'); r3.classList.remove('spinning');
                 let res1 = items[Math.floor(Math.random() * items.length)];
@@ -512,215 +497,215 @@ WEBAPP_HTML = f"""
                 r1.innerText = res1; r2.innerText = res2; r3.innerText = res3;
 
                 let resBox = document.getElementById('slotsResult');
-                if (res1 === res2 && res2 === res3) {
+                if (res1 === res2 && res2 === res3) {{
                     let win = bet * 5; updateBalance(win);
-                    resBox.innerHTML = `<span style="color:var(--accent-gold);">🎉 ДЖЕКПОТ! +${win}</span>`;
+                    resBox.innerHTML = `<span style="color:var(--accent-gold);">🎉 ДЖЕКПОТ! +${{win}}</span>`;
                     triggerHaptic('success');
-                } else if (res1 === res2 || res2 === res3 || res1 === res3) {
+                }} else if (res1 === res2 || res2 === res3 || res1 === res3) {{
                     let win = Math.floor(bet * 1.5); updateBalance(win);
-                    resBox.innerHTML = `<span style="color:var(--accent-green);">✨ Пара! +${win}</span>`;
+                    resBox.innerHTML = `<span style="color:var(--accent-green);">✨ Пара! +${{win}}</span>`;
                     triggerHaptic('success');
-                } else {
+                }} else {{
                     resBox.innerHTML = `<span style="color:var(--accent-red);">😢 Мимо...</span>`;
                     triggerHaptic('error');
-                }
-            }, 1000);
-        }
+                }}
+            }}, 1000);
+        }}
 
-        /* --- РУЛЕТКА --- */
+        /* ROULETTE */
         let selectedRoulette = 'red';
-        function selectRoulette(val) {
+        function selectRoulette(val) {{
             selectedRoulette = val;
             document.querySelectorAll('#game-roulette .flex-btns button').forEach(b => b.classList.remove('selected'));
-            document.getElementById(`roul-${val}`).classList.add('selected');
-        }
-        function playRoulette() {
+            document.getElementById(`roul-${{val}}`).classList.add('selected');
+        }}
+        function playRoulette() {{
             let bet = parseInt(document.getElementById('rouletteBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('heavy');
             let num = Math.floor(Math.random() * 37);
             let color = num === 0 ? 'zero' : (num % 2 === 0 ? 'black' : 'red');
             let resBox = document.getElementById('rouletteResult');
-            if (color === selectedRoulette) {
+            if (color === selectedRoulette) {{
                 let mult = selectedRoulette === 'zero' ? 14 : 2;
                 let win = bet * mult; updateBalance(win);
-                resBox.innerHTML = `<span style="color:var(--accent-green);">🎯 Выпало ${num} (${color.toUpperCase()})! +${win}</span>`;
+                resBox.innerHTML = `<span style="color:var(--accent-green);">🎯 Выпало ${{num}} (${{color.toUpperCase()}})! +${{win}}</span>`;
                 triggerHaptic('success');
-            } else {
-                resBox.innerHTML = `<span style="color:var(--accent-red);">❌ Выпало ${num} (${color.toUpperCase()}). Проигрыш</span>`;
+            }} else {{
+                resBox.innerHTML = `<span style="color:var(--accent-red);">❌ Выпало ${{num}} (${{color.toUpperCase()}}). Проигрыш</span>`;
                 triggerHaptic('error');
-            }
-        }
+            }}
+        }}
 
-        /* --- БЛЭКДЖЕК --- */
-        let bjState = { player: [], dealer: [], playing: false };
-        function getCard() { return Math.min(10, Math.floor(Math.random() * 10) + 1); }
-        function sumHand(h) { return h.reduce((a,b)=>a+b, 0); }
-        function startBlackjack() {
+        /* BLACKJACK */
+        let bjState = {{ player: [], dealer: [], playing: false }};
+        function getCard() {{ return Math.min(10, Math.floor(Math.random() * 10) + 1); }}
+        function sumHand(h) {{ return h.reduce((a,b)=>a+b, 0); }}
+        function startBlackjack() {{
             let bet = parseInt(document.getElementById('bjBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
-            bjState = { player: [getCard(), getCard()], dealer: [getCard()], playing: true };
+            bjState = {{ player: [getCard(), getCard()], dealer: [getCard()], playing: true }};
             document.getElementById('bjStartBtn').style.display = 'none';
             document.getElementById('bjControls').style.display = 'flex';
             document.getElementById('bjResult').innerText = '';
             renderBJ();
-        }
-        function renderBJ() {
+        }}
+        function renderBJ() {{
             document.getElementById('bjPlayerCards').innerText = bjState.player.join(' ');
             document.getElementById('bjDealerCards').innerText = bjState.dealer.join(' ') + ' 🂠';
             document.getElementById('bjPlayerScore').innerText = sumHand(bjState.player);
             document.getElementById('bjDealerScore').innerText = sumHand(bjState.dealer);
-        }
-        function bjHit() {
+        }}
+        function bjHit() {{
             if (!bjState.playing) return;
             bjState.player.push(getCard()); renderBJ();
             if (sumHand(bjState.player) > 21) endBJ(false, '💥 Перебор!');
-        }
-        function bjStand() {
+        }}
+        function bjStand() {{
             if (!bjState.playing) return;
             while(sumHand(bjState.dealer) < 17) bjState.dealer.push(getCard());
             let p = sumHand(bjState.player), d = sumHand(bjState.dealer);
             if (d > 21 || p > d) endBJ(true, '🎉 Победа!');
             else if (p === d) endBJ('draw', '🤝 Ничья!');
             else endBJ(false, '😢 Дилер выиграл!');
-        }
-        function endBJ(win, msg) {
+        }}
+        function endBJ(win, msg) {{
             bjState.playing = false;
             let bet = parseInt(document.getElementById('bjBet').value);
-            if (win === true) { updateBalance(bet * 2); triggerHaptic('success'); }
-            else if (win === 'draw') { updateBalance(bet); }
-            else { triggerHaptic('error'); }
+            if (win === true) {{ updateBalance(bet * 2); triggerHaptic('success'); }}
+            else if (win === 'draw') {{ updateBalance(bet); }}
+            else {{ triggerHaptic('error'); }}
             document.getElementById('bjDealerCards').innerText = bjState.dealer.join(' ');
             document.getElementById('bjDealerScore').innerText = sumHand(bjState.dealer);
             document.getElementById('bjResult').innerText = msg;
             document.getElementById('bjStartBtn').style.display = 'block';
             document.getElementById('bjControls').style.display = 'none';
-        }
+        }}
 
-        /* --- МИНЫ --- */
-        let minesState = { active: false, bombs: [], opened: 0, mult: 1.2 };
-        function startMines() {
+        /* MINES */
+        let minesState = {{ active: false, bombs: [], opened: 0, mult: 1.2 }};
+        function startMines() {{
             let bet = parseInt(document.getElementById('minesBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
             let grid = document.getElementById('minesGrid'); grid.innerHTML = '';
             let bombs = [];
-            while(bombs.length < 3) { let r = Math.floor(Math.random()*25); if(!bombs.includes(r)) bombs.push(r); }
-            minesState = { active: true, bombs: bombs, opened: 0, mult: 1.2, bet: bet };
-            for(let i=0; i<25; i++) {
+            while(bombs.length < 3) {{ let r = Math.floor(Math.random()*25); if(!bombs.includes(r)) bombs.push(r); }}
+            minesState = {{ active: true, bombs: bombs, opened: 0, mult: 1.2, bet: bet }};
+            for(let i=0; i<25; i++) {{
                 let tile = document.createElement('div');
                 tile.style.cssText = "aspect-ratio:1; background:rgba(255,255,255,0.06); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer;";
                 tile.onclick = () => clickMine(i, tile);
                 grid.appendChild(tile);
-            }
+            }}
             document.getElementById('minesStartBtn').style.display = 'none';
             document.getElementById('minesCashoutBtn').style.display = 'block';
             document.getElementById('minesResult').innerText = '💎 Ищите кристаллы!';
-        }
-        function clickMine(idx, tile) {
+        }}
+        function clickMine(idx, tile) {{
             if(!minesState.active || tile.style.background.includes('rgb')) return;
-            if(minesState.bombs.includes(idx)) {
+            if(minesState.bombs.includes(idx)) {{
                 tile.style.background = 'rgba(255,71,87,0.3)'; tile.innerText = '💣';
                 minesState.active = false;
                 document.getElementById('minesResult').innerHTML = '<span style="color:var(--accent-red);">💥 БУМ! Проигрыш</span>';
                 document.getElementById('minesStartBtn').style.display = 'block';
                 document.getElementById('minesCashoutBtn').style.display = 'none';
                 triggerHaptic('error');
-            } else {
+            }} else {{
                 tile.style.background = 'rgba(46,213,115,0.3)'; tile.innerText = '💎';
                 minesState.opened++; minesState.mult += 0.3;
                 let cur = Math.floor(minesState.bet * minesState.mult);
-                document.getElementById('minesResult').innerText = `💰 Профит: +${cur} (x${minesState.mult.toFixed(2)})`;
+                document.getElementById('minesResult').innerText = `💰 Профит: +${{cur}} (x${{minesState.mult.toFixed(2)}})`;
                 triggerHaptic('light');
-            }
-        }
-        function cashoutMines() {
+            }}
+        }}
+        function cashoutMines() {{
             if(!minesState.active || minesState.opened === 0) return;
             let win = Math.floor(minesState.bet * minesState.mult);
             updateBalance(win); minesState.active = false;
-            document.getElementById('minesResult').innerHTML = `<span style="color:var(--accent-green);">💰 Забрал +${win}!</span>`;
+            document.getElementById('minesResult').innerHTML = `<span style="color:var(--accent-green);">💰 Забрал +${{win}}!</span>`;
             document.getElementById('minesStartBtn').style.display = 'block';
             document.getElementById('minesCashoutBtn').style.display = 'none';
             triggerHaptic('success');
-        }
+        }}
 
-        /* --- КРАШ --- */
+        /* CRASH */
         let crashInterval = null;
-        function startCrash() {
+        function startCrash() {{
             let bet = parseInt(document.getElementById('crashBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
             let mult = 1.00, crashPoint = (Math.random() * 4 + 1).toFixed(2);
             let btn = document.getElementById('crashBtn'), display = document.getElementById('crashDisplay'), active = true;
             btn.innerText = 'Забрать';
-            btn.onclick = () => {
+            btn.onclick = () => {{
                 if(!active) return;
                 active = false; clearInterval(crashInterval);
                 let win = Math.floor(bet * mult); updateBalance(win);
-                document.getElementById('crashResult').innerHTML = `<span style="color:var(--accent-green);">🎉 Успел! +${win}</span>`;
+                document.getElementById('crashResult').innerHTML = `<span style="color:var(--accent-green);">🎉 Успел! +${{win}}</span>`;
                 btn.innerText = 'Старт'; btn.onclick = startCrash; triggerHaptic('success');
-            };
-            crashInterval = setInterval(() => {
+            }};
+            crashInterval = setInterval(() => {{
                 mult += 0.05; display.innerText = mult.toFixed(2) + 'x';
-                if(mult >= crashPoint && active) {
+                if(mult >= crashPoint && active) {{
                     active = false; clearInterval(crashInterval);
                     display.innerText = '💥 CRASH!';
-                    document.getElementById('crashResult').innerHTML = `<span style="color:var(--accent-red);">😢 Улетел на ${crashPoint}x</span>`;
+                    document.getElementById('crashResult').innerHTML = `<span style="color:var(--accent-red);">😢 Улетел на ${{crashPoint}}x</span>`;
                     btn.innerText = 'Старт'; btn.onclick = startCrash; triggerHaptic('error');
-                }
-            }, 100);
-        }
+                }}
+            }}, 100);
+        }}
 
-        /* --- КОСТИ --- */
+        /* DICE */
         let selectedDice = 'low';
-        function selectDice(val) {
+        function selectDice(val) {{
             selectedDice = val;
             document.querySelectorAll('#game-dice .flex-btns button').forEach(b => b.classList.remove('selected'));
-            document.getElementById(`dice-${val}`).classList.add('selected');
-        }
-        function playDice() {
+            document.getElementById(`dice-${{val}}`).classList.add('selected');
+        }}
+        function playDice() {{
             let bet = parseInt(document.getElementById('diceBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
             let roll = Math.floor(Math.random()*6)+1;
             let win = (selectedDice === 'low' && roll <= 3) || (selectedDice === 'high' && roll >= 4);
             let res = document.getElementById('diceResult');
-            if(win) {
+            if(win) {{
                 updateBalance(bet * 2);
-                res.innerHTML = `<span style="color:var(--accent-green);">🎲 Выпало ${roll}! +${bet*2}</span>`;
+                res.innerHTML = `<span style="color:var(--accent-green);">🎲 Выпало ${{roll}}! +${{bet*2}}</span>`;
                 triggerHaptic('success');
-            } else {
-                res.innerHTML = `<span style="color:var(--accent-red);">🎲 Выпало ${roll}. Мимо</span>`;
+            }} else {{
+                res.innerHTML = `<span style="color:var(--accent-red);">🎲 Выпало ${{roll}}. Мимо</span>`;
                 triggerHaptic('error');
-            }
-        }
+            }}
+        }}
 
-        /* --- МОНЕТКА --- */
+        /* COIN */
         let selectedCoin = 'heads';
-        function selectCoin(val) {
+        function selectCoin(val) {{
             selectedCoin = val;
             document.querySelectorAll('#game-coin .flex-btns button').forEach(b => b.classList.remove('selected'));
-            document.getElementById(`coin-${val}`).classList.add('selected');
-        }
-        function playCoin() {
+            document.getElementById(`coin-${{val}}`).classList.add('selected');
+        }}
+        function playCoin() {{
             let bet = parseInt(document.getElementById('coinBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
             let resVal = Math.random() < 0.5 ? 'heads' : 'tails';
             let res = document.getElementById('coinResult');
-            if(resVal === selectedCoin) {
+            if(resVal === selectedCoin) {{
                 updateBalance(bet * 2);
-                res.innerHTML = `<span style="color:var(--accent-green);">🪙 ${resVal === 'heads' ? 'ОРЕЛ' : 'РЕШКА'}! +${bet*2}</span>`;
+                res.innerHTML = `<span style="color:var(--accent-green);">🪙 ${{resVal === 'heads' ? 'ОРЕЛ' : 'РЕШКА'}}! +${{bet*2}}</span>`;
                 triggerHaptic('success');
-            } else {
-                res.innerHTML = `<span style="color:var(--accent-red);">🪙 Выпал ${resVal === 'heads' ? 'ОРЕЛ' : 'РЕШКА'}. Проигрыш</span>`;
+            }} else {{
+                res.innerHTML = `<span style="color:var(--accent-red);">🪙 Выпал ${{resVal === 'heads' ? 'ОРЕЛ' : 'РЕШКА'}}. Проигрыш</span>`;
                 triggerHaptic('error');
-            }
-        }
+            }}
+        }}
 
-        /* --- ПЛИНКО --- */
-        function playPlinko() {
+        /* PLINKO */
+        function playPlinko() {{
             let bet = parseInt(document.getElementById('plinkoBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
@@ -729,18 +714,18 @@ WEBAPP_HTML = f"""
             let win = Math.floor(bet * chosen);
             updateBalance(win);
             let res = document.getElementById('plinkoResult');
-            if(chosen >= 1) {
-                res.innerHTML = `<span style="color:var(--accent-green);">🔺 Множитель x${chosen}! +${win}</span>`;
+            if(chosen >= 1) {{
+                res.innerHTML = `<span style="color:var(--accent-green);">🔺 Множитель x${{chosen}}! +${{win}}</span>`;
                 triggerHaptic('success');
-            } else {
-                res.innerHTML = `<span style="color:var(--accent-red);">🔺 Множитель x${chosen}. Возврат ${win}</span>`;
+            }} else {{
+                res.innerHTML = `<span style="color:var(--accent-red);">🔺 Множитель x${{chosen}}. Возврат ${{win}}</span>`;
                 triggerHaptic('error');
-            }
-        }
+            }}
+        }}
 
-        /* --- ХАЙ-ЛО --- */
+        /* HILO */
         let hiloCurrent = Math.floor(Math.random() * 10) + 2;
-        function playHilo(guess) {
+        function playHilo(guess) {{
             let bet = parseInt(document.getElementById('hiloBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
@@ -748,95 +733,95 @@ WEBAPP_HTML = f"""
             document.getElementById('hiloCard').innerText = '🎴 ' + next;
             let win = (guess === 'higher' && next > hiloCurrent) || (guess === 'lower' && next < hiloCurrent);
             let res = document.getElementById('hiloResult');
-            if(win) {
+            if(win) {{
                 let winAmt = Math.floor(bet * 1.8);
                 updateBalance(winAmt);
-                res.innerHTML = `<span style="color:var(--accent-green);">📈 Угадали! +${winAmt}</span>`;
+                res.innerHTML = `<span style="color:var(--accent-green);">📈 Угадали! +${{winAmt}}</span>`;
                 triggerHaptic('success');
-            } else {
+            }} else {{
                 res.innerHTML = `<span style="color:var(--accent-red);">📉 Не угадали! Проигрыш</span>`;
                 triggerHaptic('error');
-            }
+            }}
             hiloCurrent = next;
-        }
+        }}
 
-        /* --- КОЛЕСО ФОРТУНЫ --- */
-        function playWheel() {
+        /* WHEEL */
+        function playWheel() {{
             let bet = parseInt(document.getElementById('wheelBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('heavy');
             let wheel = document.getElementById('fortuneWheel');
             let randomRot = Math.floor(Math.random() * 1440) + 720;
-            wheel.style.transform = `rotate(${randomRot}deg)`;
-            setTimeout(() => {
+            wheel.style.transform = `rotate(${{randomRot}}deg)`;
+            setTimeout(() => {{
                 let mults = [0, 2, 1, 5, 0, 3];
                 let m = mults[Math.floor(Math.random() * mults.length)];
                 let res = document.getElementById('wheelResult');
-                if(m > 0) {
+                if(m > 0) {{
                     let win = bet * m; updateBalance(win);
-                    res.innerHTML = `<span style="color:var(--accent-gold);">🎯 Сектор x${m}! +${win}</span>`;
+                    res.innerHTML = `<span style="color:var(--accent-gold);">🎯 Сектор x${{m}}! +${{win}}</span>`;
                     triggerHaptic('success');
-                } else {
+                }} else {{
                     res.innerHTML = `<span style="color:var(--accent-red);">🎯 Сектор НОЛЬ. Мимо</span>`;
                     triggerHaptic('error');
-                }
-            }, 3000);
-        }
+                }}
+            }}, 3000);
+        }}
 
-        /* --- КЕНО --- */
-        function playKeno() {
+        /* KENO */
+        function playKeno() {{
             let bet = parseInt(document.getElementById('kenoBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('medium');
             let drawn = [];
-            while(drawn.length < 3) { let n = Math.floor(Math.random()*10)+1; if(!drawn.includes(n)) drawn.push(n); }
+            while(drawn.length < 3) {{ let n = Math.floor(Math.random()*10)+1; if(!drawn.includes(n)) drawn.push(n); }}
             document.getElementById('kenoDrawn').innerText = drawn.join(', ');
             let res = document.getElementById('kenoResult');
-            if(drawn.includes(7)) {
+            if(drawn.includes(7)) {{
                 let win = bet * 4; updateBalance(win);
-                res.innerHTML = `<span style="color:var(--accent-green);">🔢 Совпало число 7! +${win}</span>`;
+                res.innerHTML = `<span style="color:var(--accent-green);">🔢 Совпало число 7! +${{win}}</span>`;
                 triggerHaptic('success');
-            } else {
+            }} else {{
                 res.innerHTML = `<span style="color:var(--accent-red);">🔢 Тираж мимо</span>`;
                 triggerHaptic('error');
-            }
-        }
+            }}
+        }}
 
-        /* --- СКРЕТЧ-КАРТЫ --- */
+        /* SCRATCH */
         let scratchItems = ['💎', '💎', '🍒', '🍋'];
-        function startScratch() {
+        function startScratch() {{
             let bet = parseInt(document.getElementById('scratchBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
             updateBalance(-bet); triggerHaptic('light');
             scratchItems.sort(() => Math.random() - 0.5);
-            for(let i=0; i<4; i++) {
-                let el = document.getElementById(`sc${i}`);
+            for(let i=0; i<4; i++) {{
+                let el = document.getElementById(`sc${{i}}`);
                 el.innerText = '❓'; el.style.background = 'rgba(255,255,255,0.05)';
-            }
+            }}
             document.getElementById('scratchResult').innerText = 'Сотрите ячейки';
-        }
-        function revealScratch(idx) {
-            let el = document.getElementById(`sc${idx}`);
+        }}
+        function revealScratch(idx) {{
+            let el = document.getElementById(`sc${{idx}}`);
             if(el.innerText !== '❓') return;
             el.innerText = scratchItems[idx];
             el.style.background = 'rgba(46,213,115,0.15)';
             triggerHaptic('light');
             
             let revealedCount = Array.from(document.querySelectorAll('#scratchGrid > div')).filter(e => e.innerText !== '❓').length;
-            if(revealedCount === 4) {
+            if(revealedCount === 4) {{
                 let countGems = scratchItems.filter(x => x === '💎').length;
                 let bet = parseInt(document.getElementById('scratchBet').value);
                 let res = document.getElementById('scratchResult');
-                if(countGems >= 2) {
+                if(countGems >= 2) {{
                     let win = bet * 3; updateBalance(win);
-                    res.innerHTML = `<span style="color:var(--accent-green);">🎫 Найдено алмазов! +${win}</span>`;
+                    res.innerHTML = `<span style="color:var(--accent-green);">🎫 Найдено алмазов! +${{win}}</span>`;
                     triggerHaptic('success');
-                } else {
+                }} else {{
                     res.innerHTML = `<span style="color:var(--accent-red);">🎫 Пустая карта</span>`;
                     triggerHaptic('error');
-                }
-            }
-        }
+                }}
+            }}
+        }}
     </script>
 </body>
 </html>
@@ -845,7 +830,6 @@ WEBAPP_HTML = f"""
 async def handle_webapp(request):
     return web.Response(text=WEBAPP_HTML, content_type="text/html")
 
-# --- РОУТЕР БОТА ---
 router = Router()
 
 @router.message(CommandStart())
@@ -881,7 +865,6 @@ async def inline_handler(query: InlineQuery):
     ]
     await query.answer(articles, cache_time=1, is_personal=True)
 
-# --- ЗАПУСК БОТА И СЕРВЕРА ---
 async def main():
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
@@ -898,7 +881,7 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
 
-    print(f"Бот и веб-сервер успешно запущены на порту {port}!")
+    print(f"Бот запущен на порту {port}!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
