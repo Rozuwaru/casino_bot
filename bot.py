@@ -14,17 +14,13 @@ from aiogram.types import (
 )
 from aiohttp import web
 
-# Токен бота
 TOKEN = "8752641180:AAET94FACuNdO26CCdFHFyv1vJhSiv3O7F4"
-
-# Ссылка на веб-приложение на Render
 WEBAPP_URL = "https://casino-bot-y2qo.onrender.com/webapp"
 
-# Настройки Supabase
+# Твои данные Supabase
 SUPABASE_URL = "https://lnskcqunuaewqcsvcpvr.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2tjcXVudWFld3Fjc3ZjcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzE2MjQsImV4cCI6MjEwODYwNzYyNH0.g0F_E6hIOeholtABi_WsbMzqT4H-49wTH5XYXAk_0Nc"
+SUPABASE_KEY = "sb_publishable_VnYBjZue1D7BhzKW5zDrlg_EjVU6YDO"
 
-# --- HTML / CSS / JS ИНТЕРФЕЙС (12 ИГР + SUPABASE CDN) ---
 WEBAPP_HTML = f"""
 <!DOCTYPE html>
 <html lang="ru">
@@ -41,210 +37,67 @@ WEBAPP_HTML = f"""
             --card-bg: #131622;
             --card-hover: #1b1f30;
             --accent-gold: #f7b733;
-            --accent-gold-glow: rgba(247, 183, 51, 0.3);
+            --accent-gold-glow: rgba(247, 183, 51, 0.4);
             --accent-red: #ff4757;
             --accent-green: #2ed573;
             --text-main: #ffffff;
             --text-dim: #747d8c;
             --border-color: rgba(255, 255, 255, 0.08);
         }}
-
-        * {{
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }}
-
-        body {{
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Outfit', sans-serif;
-            margin: 0;
-            padding: 16px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }}
-
-        .header {{
-            width: 100%;
-            max-width: 440px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            padding: 14px 20px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }}
-
-        .logo {{
-            font-weight: 800;
-            font-size: 18px;
-            color: var(--accent-gold);
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            text-shadow: 0 0 15px var(--accent-gold-glow);
-        }}
-
-        .balance-box {{
-            background: rgba(46, 213, 115, 0.1);
-            border: 1px solid rgba(46, 213, 115, 0.3);
-            padding: 6px 14px;
-            border-radius: 14px;
-            font-weight: 700;
-            color: var(--accent-green);
-            font-size: 15px;
-            box-shadow: 0 0 15px rgba(46, 213, 115, 0.15);
-            transition: transform 0.2s ease;
-        }}
-
+        * {{ box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }}
+        body {{ background-color: var(--bg-color); color: var(--text-main); font-family: 'Outfit', sans-serif; margin: 0; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }}
+        
+        .header {{ width: 100%; max-width: 440px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 14px 20px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); margin-bottom: 20px; backdrop-filter: blur(10px); }}
+        .logo {{ font-weight: 800; font-size: 18px; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1.2px; text-shadow: 0 0 15px var(--accent-gold-glow); }}
+        .balance-box {{ background: rgba(46, 213, 115, 0.1); border: 1px solid rgba(46, 213, 115, 0.3); padding: 6px 14px; border-radius: 14px; font-weight: 700; color: var(--accent-green); font-size: 15px; box-shadow: 0 0 15px rgba(46, 213, 115, 0.15); transition: transform 0.2s ease; }}
         .balance-box.pulse {{ transform: scale(1.1); }}
 
         .container {{ width: 100%; max-width: 440px; }}
-
-        .back-btn {{
-            background: var(--card-bg);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 10px 18px;
-            border-radius: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }}
+        .back-btn {{ background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 14px; font-weight: 600; cursor: pointer; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; }}
         .back-btn:active {{ transform: scale(0.95); background: var(--card-hover); }}
 
-        .lobby-grid {{
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            animation: fadeIn 0.4s ease;
-        }}
-
-        .game-card {{
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 18px 12px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }}
-
-        .game-card:hover, .game-card:active {{
-            transform: translateY(-5px);
-            border-color: var(--accent-gold);
-            box-shadow: 0 10px 30px var(--accent-gold-glow);
-        }}
-
+        .lobby-grid {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; animation: fadeIn 0.4s ease; }}
+        .game-card {{ background: var(--card-bg); border-radius: 20px; padding: 18px 12px; text-align: center; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden; }}
+        .game-card:hover, .game-card:active {{ transform: translateY(-5px); border-color: var(--accent-gold); box-shadow: 0 10px 30px var(--accent-gold-glow); }}
         .game-icon {{ font-size: 36px; margin-bottom: 8px; display: block; }}
         .game-title {{ font-size: 15px; font-weight: 600; margin-bottom: 4px; }}
         .game-desc {{ font-size: 11px; color: var(--text-dim); }}
 
-        .game-screen {{
-            display: none;
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 24px 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-            text-align: center;
-            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }}
+        .game-screen {{ display: none; background: var(--card-bg); border-radius: 24px; padding: 24px 20px; border: 1px solid var(--border-color); box-shadow: 0 15px 40px rgba(0,0,0,0.6); text-align: center; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }}
         .game-screen.active {{ display: block; }}
 
         @keyframes fadeIn {{ from {{ opacity: 0; transform: scale(0.95); }} to {{ opacity: 1; transform: scale(1); }} }}
         @keyframes slideUp {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
 
-        .bet-control {{
-            margin: 18px 0;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.2);
-            padding: 8px 12px;
-            border-radius: 14px;
-            border: 1px solid var(--border-color);
-        }}
+        .bet-control {{ margin: 18px 0; display: flex; gap: 10px; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 14px; border: 1px solid var(--border-color); }}
         .bet-control label {{ font-size: 13px; color: var(--text-dim); font-weight: 600; }}
-        .bet-input {{
-            width: 90px; background: transparent; border: none;
-            color: var(--accent-gold); font-weight: 800; font-size: 18px; text-align: center; outline: none;
-        }}
+        .bet-input {{ width: 90px; background: transparent; border: none; color: var(--accent-gold); font-weight: 800; font-size: 18px; text-align: center; outline: none; }}
 
-        .action-btn {{
-            background: linear-gradient(135deg, #f7b733, #fc4a1a);
-            color: #000; border: none; width: 100%; padding: 16px;
-            font-size: 16px; font-weight: 800; border-radius: 16px; cursor: pointer;
-            transition: all 0.2s ease; box-shadow: 0 6px 20px rgba(247, 183, 51, 0.3);
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }}
+        .action-btn {{ background: linear-gradient(135deg, #f7b733, #fc4a1a); color: #000; border: none; width: 100%; padding: 16px; font-size: 16px; font-weight: 800; border-radius: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 20px rgba(247, 183, 51, 0.3); text-transform: uppercase; letter-spacing: 0.5px; }}
         .action-btn:active {{ transform: scale(0.97); }}
 
         .result-box {{ margin-top: 16px; font-weight: 700; min-height: 28px; font-size: 16px; }}
-
         .flex-btns {{ display: flex; gap: 8px; margin-bottom: 14px; }}
-        .flex-btns button {{
-            flex: 1; padding: 12px 8px; background: var(--card-hover);
-            border: 1px solid var(--border-color); color: var(--text-main);
-            border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;
-        }}
-        .flex-btns button.selected {{
-            border-color: var(--accent-gold); background: rgba(247, 183, 51, 0.15); color: var(--accent-gold);
-        }}
+        .flex-btns button {{ flex: 1; padding: 12px 8px; background: var(--card-hover); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s; }}
+        .flex-btns button.selected {{ border-color: var(--accent-gold); background: rgba(247, 183, 51, 0.15); color: var(--accent-gold); }}
 
-        /* Анимации слотов */
-        .slots-reels {{
-            display: flex; justify-content: center; gap: 10px; font-size: 40px;
-            background: rgba(0,0,0,0.4); padding: 18px; border-radius: 18px;
-            border: 2px solid var(--accent-gold); margin: 16px 0; overflow: hidden; height: 100px; align-items: center;
-        }}
-        .reel {{
-            width: 65px; height: 75px; display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.04); border-radius: 12px; transition: transform 0.1s ease;
-        }}
-        .reel.spinning {{
-            animation: spinReel 0.15s infinite linear;
-        }}
-        @keyframes spinReel {{
-            0% {{ transform: translateY(-20px); opacity: 0.3; }}
-            50% {{ transform: translateY(20px); opacity: 0.3; }}
-            100% {{ transform: translateY(-20px); opacity: 0.3; }}
-        }}
+        /* Реалистичные анимации слотов */
+        .slots-reels {{ display: flex; justify-content: center; gap: 10px; font-size: 40px; background: rgba(0,0,0,0.4); padding: 18px; border-radius: 18px; border: 2px solid var(--accent-gold); margin: 16px 0; height: 100px; align-items: center; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }}
+        .reel {{ width: 65px; height: 75px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); border-radius: 12px; transition: transform 0.1s ease; }}
+        .reel.spinning {{ animation: spinReel 0.12s infinite linear; filter: blur(1.5px); }}
+        @keyframes spinReel {{ 0% {{ transform: translateY(-30px); opacity: 0.2; }} 50% {{ transform: translateY(30px); opacity: 0.2; }} 100% {{ transform: translateY(-30px); opacity: 0.2; }} }}
 
-        .wheel-container {{
-            position: relative; width: 160px; height: 160px; margin: 15px auto;
-            border-radius: 50%; background: conic-gradient(#ff4757 0deg 90deg, #2ed573 90deg 180deg, #f7b733 180deg 270deg, #3742fa 270deg 360deg);
-            border: 4px solid var(--accent-gold); box-shadow: 0 0 25px var(--accent-gold-glow);
-            transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1);
-        }}
-        .wheel-pointer {{
-            position: absolute; top: -14px; left: calc(50% - 10px); width: 0; height: 0;
-            border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #fff;
-        }}
+        .wheel-container {{ position: relative; width: 150px; height: 150px; margin: 20px auto; border-radius: 50%; background: conic-gradient(#ff4757 0deg 90deg, #2ed573 90deg 180deg, #f7b733 180deg 270deg, #3742fa 270deg 360deg); border: 4px solid var(--accent-gold); box-shadow: 0 0 25px var(--accent-gold-glow); transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1); }}
+        .wheel-pointer {{ position: absolute; top: -14px; left: calc(50% - 10px); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }}
     </style>
 </head>
 <body>
-
     <div class="header">
         <div class="logo">🎰 Casino Royale</div>
         <div class="balance-box" id="balanceBox">🪙 <span id="userBalance">1000</span></div>
     </div>
-
     <div class="container">
+        <!-- ЛОББИ -->
         <div id="lobby" class="lobby-grid">
             <div class="game-card" onclick="openGame('slots')"><span class="game-icon">🎰</span><div class="game-title">Слоты 777</div><div class="game-desc">Классика жанра</div></div>
             <div class="game-card" onclick="openGame('roulette')"><span class="game-icon">🎡</span><div class="game-title">Рулетка</div><div class="game-desc">Цвета и зеро</div></div>
@@ -260,17 +113,17 @@ WEBAPP_HTML = f"""
             <div class="game-card" onclick="openGame('scratch')"><span class="game-icon">🎫</span><div class="game-title">Скретч-карты</div><div class="game-desc">Стрирай и выигрывай</div></div>
         </div>
 
+        <!-- 1. СЛОТЫ -->
         <div id="game-slots" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎰 Слоты 777</h3>
-            <div class="slots-reels">
-                <div class="reel" id="r1">🍒</div><div class="reel" id="r2">🍋</div><div class="reel" id="r3">🔔</div>
-            </div>
+            <div class="slots-reels"><div class="reel" id="r1">🍒</div><div class="reel" id="r2">🍋</div><div class="reel" id="r3">🔔</div></div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="slotsBet" class="bet-input" value="100" min="10"></div>
             <button class="action-btn" onclick="playSlots()">Крутить!</button>
             <div class="result-box" id="slotsResult"></div>
         </div>
 
+        <!-- 2. РУЛЕТКА -->
         <div id="game-roulette" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎡 Рулетка</h3>
@@ -284,6 +137,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="rouletteResult"></div>
         </div>
 
+        <!-- 3. БЛЭКДЖЕК -->
         <div id="game-blackjack" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🃏 Блэкджек 21</h3>
@@ -303,6 +157,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="bjResult"></div>
         </div>
 
+        <!-- 4. МИННОЕ ПОЛЕ -->
         <div id="game-mines" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>💣 Минное поле</h3>
@@ -313,6 +168,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="minesResult"></div>
         </div>
 
+        <!-- 5. КРАШ -->
         <div id="game-crash" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🚀 Краш X</h3>
@@ -322,6 +178,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="crashResult"></div>
         </div>
 
+        <!-- 6. КОСТИ -->
         <div id="game-dice" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎲 Кости</h3>
@@ -334,6 +191,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="diceResult"></div>
         </div>
 
+        <!-- 7. МОНЕТКА -->
         <div id="game-coin" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🪙 Монетка</h3>
@@ -346,6 +204,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="coinResult"></div>
         </div>
 
+        <!-- 8. ПЛИНКО -->
         <div id="game-plinko" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🔺 Плинко</h3>
@@ -361,6 +220,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="plinkoResult"></div>
         </div>
 
+        <!-- 9. ХАЙ-ЛО -->
         <div id="game-hilo" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>📈 Хай-Ло</h3>
@@ -373,6 +233,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="hiloResult">Угадайте карту</div>
         </div>
 
+        <!-- 10. КОЛЕСО ФОРТУНЫ -->
         <div id="game-wheel" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎯 Колесо Фортуны</h3>
@@ -385,6 +246,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="wheelResult"></div>
         </div>
 
+        <!-- 11. КЕНО -->
         <div id="game-keno" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🔢 Кено Лото</h3>
@@ -394,6 +256,7 @@ WEBAPP_HTML = f"""
             <div class="result-box" id="kenoResult"></div>
         </div>
 
+        <!-- 12. СКРЕТЧ-КАРТЫ -->
         <div id="game-scratch" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎫 Скретч-карты</h3>
@@ -413,16 +276,13 @@ WEBAPP_HTML = f"""
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const supabaseUrl = "{SUPABASE_URL}";
-        const supabaseKey = "{SUPABASE_KEY}";
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
+        const _supabase = supabase.createClient("{SUPABASE_URL}", "{SUPABASE_KEY}");
         let userId = tg.initDataUnsafe?.user?.id || Math.floor(Math.random() * 1000000);
         let balance = 1000;
 
         async function loadUserBalance() {{
             try {{
-                let {{ data, error }} = await _supabase.from('users').select('balance').eq('user_id', userId).single();
+                let {{ data }} = await _supabase.from('users').select('balance').eq('user_id', userId).single();
                 if (data) {{
                     balance = data.balance;
                 }} else {{
@@ -430,9 +290,7 @@ WEBAPP_HTML = f"""
                     balance = 1000;
                 }}
                 document.getElementById('userBalance').innerText = balance;
-            }} catch (e) {{
-                console.error("Ошибка загрузки баланса:", e);
-            }}
+            }} catch (e) {{ console.error(e); }}
         }}
 
         async function updateBalance(amount) {{
@@ -442,12 +300,9 @@ WEBAPP_HTML = f"""
             el.innerText = balance;
             box.classList.add('pulse');
             setTimeout(() => box.classList.remove('pulse'), 200);
-
             try {{
                 await _supabase.from('users').update({{ balance: balance }}).eq('user_id', userId);
-            }} catch (e) {{
-                console.error("Ошибка сохранения баланса:", e);
-            }}
+            }} catch (e) {{ console.error(e); }}
         }}
 
         loadUserBalance();
@@ -471,23 +326,18 @@ WEBAPP_HTML = f"""
             document.getElementById(`game-${{gameId}}`).classList.add('active');
         }}
 
-        /* SLOTS */
         function playSlots() {{
             let bet = parseInt(document.getElementById('slotsBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
-            updateBalance(-bet);
-            triggerHaptic('heavy');
-
+            updateBalance(-bet); triggerHaptic('heavy');
             let items = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
             let r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3');
             r1.classList.add('spinning'); r2.classList.add('spinning'); r3.classList.add('spinning');
-
             let timer = setInterval(() => {{
                 r1.innerText = items[Math.floor(Math.random() * items.length)];
                 r2.innerText = items[Math.floor(Math.random() * items.length)];
                 r3.innerText = items[Math.floor(Math.random() * items.length)];
             }}, 60);
-
             setTimeout(() => {{
                 clearInterval(timer);
                 r1.classList.remove('spinning'); r2.classList.remove('spinning'); r3.classList.remove('spinning');
@@ -495,7 +345,6 @@ WEBAPP_HTML = f"""
                 let res2 = items[Math.floor(Math.random() * items.length)];
                 let res3 = items[Math.floor(Math.random() * items.length)];
                 r1.innerText = res1; r2.innerText = res2; r3.innerText = res3;
-
                 let resBox = document.getElementById('slotsResult');
                 if (res1 === res2 && res2 === res3) {{
                     let win = bet * 5; updateBalance(win);
@@ -512,7 +361,6 @@ WEBAPP_HTML = f"""
             }}, 1000);
         }}
 
-        /* ROULETTE */
         let selectedRoulette = 'red';
         function selectRoulette(val) {{
             selectedRoulette = val;
@@ -537,7 +385,6 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* BLACKJACK */
         let bjState = {{ player: [], dealer: [], playing: false }};
         function getCard() {{ return Math.min(10, Math.floor(Math.random() * 10) + 1); }}
         function sumHand(h) {{ return h.reduce((a,b)=>a+b, 0); }}
@@ -583,7 +430,6 @@ WEBAPP_HTML = f"""
             document.getElementById('bjControls').style.display = 'none';
         }}
 
-        /* MINES */
         let minesState = {{ active: false, bombs: [], opened: 0, mult: 1.2 }};
         function startMines() {{
             let bet = parseInt(document.getElementById('minesBet').value);
@@ -630,7 +476,6 @@ WEBAPP_HTML = f"""
             triggerHaptic('success');
         }}
 
-        /* CRASH */
         let crashInterval = null;
         function startCrash() {{
             let bet = parseInt(document.getElementById('crashBet').value);
@@ -657,7 +502,6 @@ WEBAPP_HTML = f"""
             }}, 100);
         }}
 
-        /* DICE */
         let selectedDice = 'low';
         function selectDice(val) {{
             selectedDice = val;
@@ -681,7 +525,6 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* COIN */
         let selectedCoin = 'heads';
         function selectCoin(val) {{
             selectedCoin = val;
@@ -704,7 +547,6 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* PLINKO */
         function playPlinko() {{
             let bet = parseInt(document.getElementById('plinkoBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -723,7 +565,6 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* HILO */
         let hiloCurrent = Math.floor(Math.random() * 10) + 2;
         function playHilo(guess) {{
             let bet = parseInt(document.getElementById('hiloBet').value);
@@ -745,7 +586,6 @@ WEBAPP_HTML = f"""
             hiloCurrent = next;
         }}
 
-        /* WHEEL */
         function playWheel() {{
             let bet = parseInt(document.getElementById('wheelBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -768,7 +608,6 @@ WEBAPP_HTML = f"""
             }}, 3000);
         }}
 
-        /* KENO */
         function playKeno() {{
             let bet = parseInt(document.getElementById('kenoBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -787,7 +626,6 @@ WEBAPP_HTML = f"""
             }}
         }}
 
-        /* SCRATCH */
         let scratchItems = ['💎', '💎', '🍒', '🍋'];
         function startScratch() {{
             let bet = parseInt(document.getElementById('scratchBet').value);
@@ -806,7 +644,6 @@ WEBAPP_HTML = f"""
             el.innerText = scratchItems[idx];
             el.style.background = 'rgba(46,213,115,0.15)';
             triggerHaptic('light');
-            
             let revealedCount = Array.from(document.querySelectorAll('#scratchGrid > div')).filter(e => e.innerText !== '❓').length;
             if(revealedCount === 4) {{
                 let countGems = scratchItems.filter(x => x === '💎').length;
@@ -839,28 +676,17 @@ async def cmd_start(message: Message):
             [InlineKeyboardButton(text="🎰 Открыть Casino Royale", web_app=WebAppInfo(url=WEBAPP_URL))]
         ]
     )
-    await message.answer(
-        "🎰 **Добро пожаловать в Grand Royale Casino!**\n\n"
-        "Доступно **12 игр** с плавной анимацией и облачным сохранением баланса через Supabase.",
-        reply_markup=keyboard,
-        parse_mode="Markdown"
-    )
+    await message.answer("🎰 **Добро пожаловать в Grand Royale Casino!**", reply_markup=keyboard, parse_mode="Markdown")
 
 @router.inline_query()
 async def inline_handler(query: InlineQuery):
     articles = [
         InlineQueryResultArticle(
             id="casino_app",
-            title="🎰 Casino Royale (12 Игр)",
-            description="Облачное казино с плавной анимацией",
-            input_message_content=InputTextMessageContent(
-                message_text="🎰 Я открыл игровой зал казино! Присоединяйся к игре."
-            ),
-            reply_markup=InlineKeyboardMarkup(
-                inline_keyboard=[
-                    [InlineKeyboardButton(text="🎲 Играть в казино", web_app=WebAppInfo(url=WEBAPP_URL))]
-                ]
-            )
+            title="🎰 Casino Royale",
+            description="Облачное казино",
+            input_message_content=InputTextMessageContent(message_text="🎰 Я открыл казино! Присоединяйся."),
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🎲 Играть", web_app=WebAppInfo(url=WEBAPP_URL))]])
         )
     ]
     await query.answer(articles, cache_time=1, is_personal=True)
@@ -881,7 +707,7 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
 
-    print(f"Бот запущен на порту {port}!")
+    print(f"Бот запущен на порту {port} с Supabase через CDN!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
