@@ -16,7 +16,7 @@ from aiogram.types import (
 from aiohttp import web
 
 # Твой токен от BotFather
-TOKEN = "8752641180:AAEFFiJn6yKMK_ymFE4hc6kHKBOzgb9YWK8"
+TOKEN = "8752641180:AAET94FACuNdO26CCdFHFyv1vJhSiv3O7F4"
 
 # Ссылка на твоё приложение на Render с /webapp на конце
 WEBAPP_URL = "https://casino-bot-y2qo.onrender.com/webapp"
