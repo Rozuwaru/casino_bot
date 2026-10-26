@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-import sqlite3
 from aiogram import Bot, Dispatcher, Router
 from aiogram.filters import CommandStart
 from aiogram.types import (
@@ -15,34 +14,19 @@ from aiogram.types import (
 )
 from aiohttp import web
 
-# Обновленный токен бота
+# Токен бота
 TOKEN = "8752641180:AAET94FACuNdO26CCdFHFyv1vJhSiv3O7F4"
 
 # Ссылка на веб-приложение на Render
 WEBAPP_URL = "https://casino-bot-y2qo.onrender.com/webapp"
 
-# --- БАЗА ДАННЫХ ---
-def init_db():
-    conn = sqlite3.connect("casino.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
-            balance INTEGER DEFAULT 1000
-        )
-    """)
-    conn.commit()
-    conn.close()
+# --- НАСТРОЙКИ SUPABASE API (БЕЗ ПАРОЛЯ) ---
+# Замени на свои данные из Supabase Settings -> API
+SUPABASE_URL = "https://lnskcqunuaewqcsvcpvr.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxuc2tjcXVudWFld3Fjc3ZjcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzE2MjQsImV4cCI6MjEwODYwNzYyNH0.g0F_E6hIOeholtABi_WsbMzqT4H-49wTH5XYXAk_0Nc"
 
-def add_user(user_id: int):
-    conn = sqlite3.connect("casino.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT OR IGNORE INTO users (user_id, balance) VALUES (?, 1000)", (user_id,))
-    conn.commit()
-    conn.close()
-
-# --- ПРЕМИУМ HTML / CSS / JS ИНТЕРФЕЙС (12 ИГР) ---
-WEBAPP_HTML = """
+# --- HTML / CSS / JS ИНТЕРФЕЙС (12 ИГР + АНИМАЦИИ + SUPABASE) ---
+WEBAPP_HTML = f"""
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -50,9 +34,10 @@ WEBAPP_HTML = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Grand Royale Casino</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
+        :root {{
             --bg-color: #090a0f;
             --card-bg: #131622;
             --card-hover: #1b1f30;
@@ -63,16 +48,16 @@ WEBAPP_HTML = """
             --text-main: #ffffff;
             --text-dim: #747d8c;
             --border-color: rgba(255, 255, 255, 0.08);
-        }
+        }}
 
-        * {
+        * {{
             box-sizing: border-box;
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
-        }
+        }}
 
-        body {
+        body {{
             background-color: var(--bg-color);
             color: var(--text-main);
             font-family: 'Outfit', sans-serif;
@@ -82,9 +67,9 @@ WEBAPP_HTML = """
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
+        }}
 
-        .header {
+        .header {{
             width: 100%;
             max-width: 440px;
             display: flex;
@@ -97,18 +82,18 @@ WEBAPP_HTML = """
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             margin-bottom: 20px;
             backdrop-filter: blur(10px);
-        }
+        }}
 
-        .logo {
+        .logo {{
             font-weight: 800;
             font-size: 18px;
             color: var(--accent-gold);
             text-transform: uppercase;
             letter-spacing: 1.2px;
             text-shadow: 0 0 15px var(--accent-gold-glow);
-        }
+        }}
 
-        .balance-box {
+        .balance-box {{
             background: rgba(46, 213, 115, 0.1);
             border: 1px solid rgba(46, 213, 115, 0.3);
             padding: 6px 14px;
@@ -120,16 +105,11 @@ WEBAPP_HTML = """
             transition: transform 0.2s ease;
         }
 
-        .balance-box.pulse {
-            transform: scale(1.1);
-        }
+        .balance-box.pulse {{ transform: scale(1.1); }}
 
-        .container {
-            width: 100%;
-            max-width: 440px;
-        }
+        .container {{ width: 100%; max-width: 440px; }}
 
-        .back-btn {
+        .back-btn {{
             background: var(--card-bg);
             color: var(--text-main);
             border: 1px solid var(--border-color);
@@ -143,17 +123,16 @@ WEBAPP_HTML = """
             gap: 8px;
             transition: all 0.2s ease;
         }
+        .back-btn:active {{ transform: scale(0.95); background: var(--card-hover); }}
 
-        .back-btn:active { transform: scale(0.95); background: var(--card-hover); }
-
-        .lobby-grid {
+        .lobby-grid {{
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             animation: fadeIn 0.4s ease;
         }
 
-        .game-card {
+        .game-card {{
             background: var(--card-bg);
             border-radius: 20px;
             padding: 18px 12px;
@@ -165,42 +144,17 @@ WEBAPP_HTML = """
             overflow: hidden;
         }
 
-        .game-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(247, 183, 51, 0.1), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .game-card:hover, .game-card:active {
+        .game-card:hover, .game-card:active {{
             transform: translateY(-5px);
             border-color: var(--accent-gold);
             box-shadow: 0 10px 30px var(--accent-gold-glow);
-        }
+        }}
 
-        .game-card:hover::before { opacity: 1; }
+        .game-icon {{ font-size: 36px; margin-bottom: 8px; display: block; }}
+        .game-title {{ font-size: 15px; font-weight: 600; margin-bottom: 4px; }}
+        .game-desc {{ font-size: 11px; color: var(--text-dim); }}
 
-        .game-icon {
-            font-size: 36px;
-            margin-bottom: 8px;
-            display: block;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-        }
-
-        .game-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .game-desc {
-            font-size: 11px;
-            color: var(--text-dim);
-        }
-
-        .game-screen {
+        .game-screen {{
             display: none;
             background: var(--card-bg);
             border-radius: 24px;
@@ -210,22 +164,12 @@ WEBAPP_HTML = """
             text-align: center;
             animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .game-screen.active {{ display: block; }}
 
-        .game-screen.active {
-            display: block;
-        }
+        @keyframes fadeIn {{ from {{ opacity: 0; transform: scale(0.95); }} to {{ opacity: 1; transform: scale(1); }} }}
+        @keyframes slideUp {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .bet-control {
+        .bet-control {{
             margin: 18px 0;
             display: flex;
             gap: 10px;
@@ -236,161 +180,62 @@ WEBAPP_HTML = """
             border-radius: 14px;
             border: 1px solid var(--border-color);
         }
-
-        .bet-control label {
-            font-size: 13px;
-            color: var(--text-dim);
-            font-weight: 600;
+        .bet-control label {{ font-size: 13px; color: var(--text-dim); font-weight: 600; }}
+        .bet-input {{
+            width: 90px; background: transparent; border: none;
+            color: var(--accent-gold); font-weight: 800; font-size: 18px; text-align: center; outline: none;
         }
 
-        .bet-input {
-            width: 90px;
-            background: transparent;
-            border: none;
-            color: var(--accent-gold);
-            font-weight: 800;
-            font-size: 18px;
-            text-align: center;
-            outline: none;
-        }
-
-        .action-btn {
+        .action-btn {{
             background: linear-gradient(135deg, #f7b733, #fc4a1a);
-            color: #000;
-            border: none;
-            width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 800;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 20px rgba(247, 183, 51, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #000; border: none; width: 100%; padding: 16px;
+            font-size: 16px; font-weight: 800; border-radius: 16px; cursor: pointer;
+            transition: all 0.2s ease; box-shadow: 0 6px 20px rgba(247, 183, 51, 0.3);
+            text-transform: uppercase; letter-spacing: 0.5px;
         }
+        .action-btn:active {{ transform: scale(0.97); }}
 
-        .action-btn:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(247, 183, 51, 0.2); }
+        .result-box {{ margin-top: 16px; font-weight: 700; min-height: 28px; font-size: 16px; }}
 
-        .result-box {
-            margin-top: 16px;
-            font-weight: 700;
-            min-height: 28px;
-            font-size: 16px;
-            transition: all 0.3s ease;
+        .flex-btns {{ display: flex; gap: 8px; margin-bottom: 14px; }}
+        .flex-btns button {{
+            flex: 1; padding: 12px 8px; background: var(--card-hover);
+            border: 1px solid var(--border-color); color: var(--text-main);
+            border-radius: 12px; font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;
         }
+        .flex-btns button.selected {{
+            border-color: var(--accent-gold); background: rgba(247, 183, 51, 0.15); color: var(--accent-gold);
+        }}
 
-        .flex-btns {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
+        /* Анимации слотов */
+        .slots-reels {{
+            display: flex; justify-content: center; gap: 10px; font-size: 40px;
+            background: rgba(0,0,0,0.4); padding: 18px; border-radius: 18px;
+            border: 2px solid var(--accent-gold); margin: 16px 0; overflow: hidden; height: 100px; align-items: center;
+        }}
+        .reel {{
+            width: 65px; height: 75px; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04); border-radius: 12px; transition: transform 0.1s ease;
+        }}
+        .reel.spinning {{
+            animation: spinReel 0.15s infinite linear;
+        }}
+        @keyframes spinReel {{
+            0% {{ transform: translateY(-20px); opacity: 0.3; }}
+            50% {{ transform: translateY(20px); opacity: 0.3; }}
+            100% {{ transform: translateY(-20px); opacity: 0.3; }}
+        }}
 
-        .flex-btns button {
-            flex: 1;
-            padding: 12px 8px;
-            background: var(--card-hover);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .flex-btns button.selected {
-            border-color: var(--accent-gold);
-            background: rgba(247, 183, 51, 0.15);
-            color: var(--accent-gold);
-            box-shadow: 0 0 15px var(--accent-gold-glow);
-        }
-
-        /* Анимации игр */
-        .slots-reels {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            font-size: 40px;
-            background: rgba(0,0,0,0.4);
-            padding: 18px;
-            border-radius: 18px;
-            border: 2px solid var(--accent-gold);
-            margin: 16px 0;
-            box-shadow: inset 0 4px 15px rgba(0,0,0,0.8);
-        }
-
-        .reel {
-            width: 65px; height: 65px;
-            line-height: 65px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 12px;
-            transition: transform 0.1s ease;
-        }
-
-        .wheel-container {
-            position: relative;
-            width: 180px; height: 180px;
-            margin: 15px auto;
-            border-radius: 50%;
-            background: conic-gradient(#ff4757 0deg 90deg, #2ed573 90deg 180deg, #f7b733 180deg 270deg, #3742fa 270deg 360deg);
-            border: 4px solid var(--accent-gold);
-            box-shadow: 0 0 25px var(--accent-gold-glow);
+        .wheel-container {{
+            position: relative; width: 160px; height: 160px; margin: 15px auto;
+            border-radius: 50%; background: conic-gradient(#ff4757 0deg 90deg, #2ed573 90deg 180deg, #f7b733 180deg 270deg, #3742fa 270deg 360deg);
+            border: 4px solid var(--accent-gold); box-shadow: 0 0 25px var(--accent-gold-glow);
             transition: transform 3s cubic-bezier(0.15, 0.9, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        .wheel-pointer {
-            position: absolute; top: -12px;
-            width: 0; height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-bottom: 20px solid #fff;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
-
-        .plinko-board {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin: 16px 0;
-            background: rgba(0,0,0,0.3);
-            padding: 12px;
-            border-radius: 16px;
-        }
-        .plinko-slot {
-            background: rgba(255,255,255,0.06);
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent-gold);
-            border: 1px solid var(--border-color);
-        }
-
-        .scratch-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin: 16px 0;
-        }
-        .scratch-card-item {
-            background: rgba(255,255,255,0.05);
-            border: 1px dashed var(--border-color);
-            border-radius: 14px;
-            height: 65px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .scratch-card-item.revealed {
-            background: rgba(46, 213, 115, 0.15);
-            border: 1px solid var(--accent-green);
-        }
+        .wheel-pointer {{
+            position: absolute; top: -14px; left: calc(50% - 10px); width: 0; height: 0;
+            border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid #fff;
+        }}
     </style>
 </head>
 <body>
@@ -401,7 +246,6 @@ WEBAPP_HTML = """
     </div>
 
     <div class="container">
-
         <!-- ЛОББИ (12 ИГР) -->
         <div id="lobby" class="lobby-grid">
             <div class="game-card" onclick="openGame('slots')"><span class="game-icon">🎰</span><div class="game-title">Слоты 777</div><div class="game-desc">Классика жанра</div></div>
@@ -411,8 +255,6 @@ WEBAPP_HTML = """
             <div class="game-card" onclick="openGame('crash')"><span class="game-icon">🚀</span><div class="game-title">Краш X</div><div class="game-desc">Улети до взрыва</div></div>
             <div class="game-card" onclick="openGame('dice')"><span class="game-icon">🎲</span><div class="game-title">Кости</div><div class="game-desc">Больше / Меньше</div></div>
             <div class="game-card" onclick="openGame('coin')"><span class="game-icon">🪙</span><div class="game-title">Монетка</div><div class="game-desc">Орел или Решка</div></div>
-            
-            <!-- 5 НОВЫХ ИГР -->
             <div class="game-card" onclick="openGame('plinko')"><span class="game-icon">🔺</span><div class="game-title">Плинко</div><div class="game-desc">Пирамида удачи</div></div>
             <div class="game-card" onclick="openGame('hilo')"><span class="game-icon">📈</span><div class="game-title">Хай-Ло</div><div class="game-desc">Выше или ниже</div></div>
             <div class="game-card" onclick="openGame('wheel')"><span class="game-icon">🎯</span><div class="game-title">Колесо Фортуны</div><div class="game-desc">Множители x5</div></div>
@@ -513,23 +355,23 @@ WEBAPP_HTML = """
             <div class="result-box" id="coinResult"></div>
         </div>
 
-        <!-- 8. ПЛИНКО (НОВАЯ) -->
+        <!-- 8. ПЛИНКО -->
         <div id="game-plinko" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🔺 Плинко</h3>
-            <div class="plinko-board">
-                <div class="plinko-slot">0.2x</div>
-                <div class="plinko-slot">0.5x</div>
-                <div class="plinko-slot">2x</div>
-                <div class="plinko-slot">5x</div>
-                <div class="plinko-slot">10x</div>
+            <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin:16px 0;">
+                <div style="background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; font-size:12px; font-weight:700; color:var(--accent-gold);">0.2x</div>
+                <div style="background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; font-size:12px; font-weight:700; color:var(--accent-gold);">0.5x</div>
+                <div style="background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; font-size:12px; font-weight:700; color:var(--accent-gold);">2x</div>
+                <div style="background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; font-size:12px; font-weight:700; color:var(--accent-gold);">5x</div>
+                <div style="background:rgba(255,255,255,0.06); padding:10px; border-radius:10px; font-size:12px; font-weight:700; color:var(--accent-gold);">10x</div>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="plinkoBet" class="bet-input" value="100" min="10"></div>
             <button class="action-btn" onclick="playPlinko()">Запустить шар</button>
             <div class="result-box" id="plinkoResult"></div>
         </div>
 
-        <!-- 9. ХАЙ-ЛО (НОВАЯ) -->
+        <!-- 9. ХАЙ-ЛО -->
         <div id="game-hilo" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>📈 Хай-Ло</h3>
@@ -539,10 +381,10 @@ WEBAPP_HTML = """
                 <button onclick="playHilo('higher')">📈 Выше</button>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="hiloBet" class="bet-input" value="100" min="10"></div>
-            <div class="result-box" id="hiloResult">Сделайте ставку и угадайте карту</div>
+            <div class="result-box" id="hiloResult">Угадайте карту</div>
         </div>
 
-        <!-- 10. КОЛЕСО ФОРТУНЫ (НОВАЯ) -->
+        <!-- 10. КОЛЕСО ФОРТУНЫ -->
         <div id="game-wheel" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎯 Колесо Фортуны</h3>
@@ -555,7 +397,7 @@ WEBAPP_HTML = """
             <div class="result-box" id="wheelResult"></div>
         </div>
 
-        <!-- 11. КЕНО (НОВАЯ) -->
+        <!-- 11. КЕНО -->
         <div id="game-keno" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🔢 Кено Лото</h3>
@@ -565,44 +407,73 @@ WEBAPP_HTML = """
             <div class="result-box" id="kenoResult"></div>
         </div>
 
-        <!-- 12. СКРЕТЧ-КАРТЫ (НОВАЯ) -->
+        <!-- 12. СКРЕТЧ-КАРТЫ -->
         <div id="game-scratch" class="game-screen">
             <button class="back-btn" onclick="showLobby()">⬅ Назад</button>
             <h3>🎫 Скретч-карты</h3>
-            <div class="scratch-grid" id="scratchGrid">
-                <div class="scratch-card-item" onclick="revealScratch(0)" id="sc0">❓</div>
-                <div class="scratch-card-item" onclick="revealScratch(1)" id="sc1">❓</div>
-                <div class="scratch-card-item" onclick="revealScratch(2)" id="sc2">❓</div>
-                <div class="scratch-card-item" onclick="revealScratch(3)" id="sc3">❓</div>
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin:16px 0;" id="scratchGrid">
+                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:65px; display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer;" onclick="revealScratch(0)" id="sc0">❓</div>
+                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:65px; display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer;" onclick="revealScratch(1)" id="sc1">❓</div>
+                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:65px; display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer;" onclick="revealScratch(2)" id="sc2">❓</div>
+                <div style="background:rgba(255,255,255,0.05); border-radius:14px; height:65px; display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer;" onclick="revealScratch(3)" id="sc3">❓</div>
             </div>
             <div class="bet-control"><label>Ставка:</label><input type="number" id="scratchBet" class="bet-input" value="100" min="10"></div>
             <button class="action-btn" onclick="startScratch()">Новая карта</button>
             <div class="result-box" id="scratchResult">Сотрите ячейки</div>
         </div>
-
     </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // Подключение Supabase в клиентской части
+        const supabaseUrl = "{SUPABASE_URL}";
+        const supabaseKey = "{SUPABASE_KEY}";
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let userId = tg.initDataUnsafe?.user?.id || Math.floor(Math.random() * 1000000);
         let balance = 1000;
-        function updateBalance(amount) {
+
+        async function loadUserBalance() {{
+            try {{
+                let {{ data, error }} = await _supabase.from('users').select('balance').eq('user_id', userId).single();
+                if (data) {{
+                    balance = data.balance;
+                }} else {{
+                    await _supabase.from('users').insert([{{ user_id: userId, balance: 1000 }}]);
+                    balance = 1000;
+                }}
+                document.getElementById('userBalance').innerText = balance;
+            }} catch (e) {{
+                console.error("Ошибка загрузки баланса:", e);
+            }}
+        }}
+
+        async function updateBalance(amount) {{
             balance += amount;
             let el = document.getElementById('userBalance');
             let box = document.getElementById('balanceBox');
             el.innerText = balance;
             box.classList.add('pulse');
             setTimeout(() => box.classList.remove('pulse'), 200);
-        }
 
-        function triggerHaptic(type = 'medium') {
-            if (tg.HapticFeedback) {
+            try {{
+                await _supabase.from('users').update({{ balance: balance }}).eq('user_id', userId);
+            }} catch (e) {{
+                console.error("Ошибка сохранения баланса:", e);
+            }}
+        }}
+
+        loadUserBalance();
+
+        function triggerHaptic(type = 'medium') {{
+            if (tg.HapticFeedback) {{
                 if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
                 else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
                 else tg.HapticFeedback.impactOccurred(type);
-            }
-        }
+            }}
+        }}
 
         function showLobby() {
             document.querySelectorAll('.game-screen').forEach(el => el.classList.remove('active'));
@@ -615,7 +486,7 @@ WEBAPP_HTML = """
             document.getElementById(`game-${gameId}`).classList.add('active');
         }
 
-        /* --- СЛОТЫ --- */
+        /* --- СЛОТЫ (С ПЛАВНЫМ ВРАЩЕНИЕМ) --- */
         function playSlots() {
             let bet = parseInt(document.getElementById('slotsBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -624,14 +495,17 @@ WEBAPP_HTML = """
 
             let items = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
             let r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3');
+            r1.classList.add('spinning'); r2.classList.add('spinning'); r3.classList.add('spinning');
+
             let timer = setInterval(() => {
                 r1.innerText = items[Math.floor(Math.random() * items.length)];
                 r2.innerText = items[Math.floor(Math.random() * items.length)];
                 r3.innerText = items[Math.floor(Math.random() * items.length)];
-            }, 70);
+            }, 60);
 
             setTimeout(() => {
                 clearInterval(timer);
+                r1.classList.remove('spinning'); r2.classList.remove('spinning'); r3.classList.remove('spinning');
                 let res1 = items[Math.floor(Math.random() * items.length)];
                 let res2 = items[Math.floor(Math.random() * items.length)];
                 let res3 = items[Math.floor(Math.random() * items.length)];
@@ -650,7 +524,7 @@ WEBAPP_HTML = """
                     resBox.innerHTML = `<span style="color:var(--accent-red);">😢 Мимо...</span>`;
                     triggerHaptic('error');
                 }
-            }, 900);
+            }, 1000);
         }
 
         /* --- РУЛЕТКА --- */
@@ -663,8 +537,7 @@ WEBAPP_HTML = """
         function playRoulette() {
             let bet = parseInt(document.getElementById('rouletteBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
-            updateBalance(-bet);
-            triggerHaptic('heavy');
+            updateBalance(-bet); triggerHaptic('heavy');
             let num = Math.floor(Math.random() * 37);
             let color = num === 0 ? 'zero' : (num % 2 === 0 ? 'black' : 'red');
             let resBox = document.getElementById('rouletteResult');
@@ -846,7 +719,7 @@ WEBAPP_HTML = """
             }
         }
 
-        /* --- 1. ПЛИНКО --- */
+        /* --- ПЛИНКО --- */
         function playPlinko() {
             let bet = parseInt(document.getElementById('plinkoBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -857,7 +730,7 @@ WEBAPP_HTML = """
             updateBalance(win);
             let res = document.getElementById('plinkoResult');
             if(chosen >= 1) {
-                res.innerHTML = `<span style="color:var(--accent-green);">🔺 Множитель x${chosen}! Выигрыш +${win}</span>`;
+                res.innerHTML = `<span style="color:var(--accent-green);">🔺 Множитель x${chosen}! +${win}</span>`;
                 triggerHaptic('success');
             } else {
                 res.innerHTML = `<span style="color:var(--accent-red);">🔺 Множитель x${chosen}. Возврат ${win}</span>`;
@@ -865,7 +738,7 @@ WEBAPP_HTML = """
             }
         }
 
-        /* --- 2. ХАЙ-ЛО --- */
+        /* --- ХАЙ-ЛО --- */
         let hiloCurrent = Math.floor(Math.random() * 10) + 2;
         function playHilo(guess) {
             let bet = parseInt(document.getElementById('hiloBet').value);
@@ -876,8 +749,9 @@ WEBAPP_HTML = """
             let win = (guess === 'higher' && next > hiloCurrent) || (guess === 'lower' && next < hiloCurrent);
             let res = document.getElementById('hiloResult');
             if(win) {
-                updateBalance(bet * 1.8);
-                res.innerHTML = `<span style="color:var(--accent-green);">📈 Угадали! +${Math.floor(bet*1.8)}</span>`;
+                let winAmt = Math.floor(bet * 1.8);
+                updateBalance(winAmt);
+                res.innerHTML = `<span style="color:var(--accent-green);">📈 Угадали! +${winAmt}</span>`;
                 triggerHaptic('success');
             } else {
                 res.innerHTML = `<span style="color:var(--accent-red);">📉 Не угадали! Проигрыш</span>`;
@@ -886,7 +760,7 @@ WEBAPP_HTML = """
             hiloCurrent = next;
         }
 
-        /* --- 3. КОЛЕСО ФОРТУНЫ --- */
+        /* --- КОЛЕСО ФОРТУНЫ --- */
         function playWheel() {
             let bet = parseInt(document.getElementById('wheelBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -900,16 +774,16 @@ WEBAPP_HTML = """
                 let res = document.getElementById('wheelResult');
                 if(m > 0) {
                     let win = bet * m; updateBalance(win);
-                    res.innerHTML = `<span style="color:var(--accent-gold);">🎯 Сектор x${m}! Выигрыш +${win}</span>`;
+                    res.innerHTML = `<span style="color:var(--accent-gold);">🎯 Сектор x${m}! +${win}</span>`;
                     triggerHaptic('success');
                 } else {
-                    res.innerHTML = `<span style="color:var(--accent-red);">🎯 Сектор БОНУС-НОЛЬ. Мимо</span>`;
+                    res.innerHTML = `<span style="color:var(--accent-red);">🎯 Сектор НОЛЬ. Мимо</span>`;
                     triggerHaptic('error');
                 }
             }, 3000);
         }
 
-        /* --- 4. КЕНО --- */
+        /* --- КЕНО --- */
         function playKeno() {
             let bet = parseInt(document.getElementById('kenoBet').value);
             if (bet > balance || bet <= 0) return alert('Недостаточно средств!');
@@ -923,12 +797,12 @@ WEBAPP_HTML = """
                 res.innerHTML = `<span style="color:var(--accent-green);">🔢 Совпало число 7! +${win}</span>`;
                 triggerHaptic('success');
             } else {
-                res.innerHTML = `<span style="color:var(--accent-red);">🔢 Тираж мимо кассы</span>`;
+                res.innerHTML = `<span style="color:var(--accent-red);">🔢 Тираж мимо</span>`;
                 triggerHaptic('error');
             }
         }
 
-        /* --- 5. СКРЕТЧ-КАРТЫ --- */
+        /* --- СКРЕТЧ-КАРТЫ --- */
         let scratchItems = ['💎', '💎', '🍒', '🍋'];
         function startScratch() {
             let bet = parseInt(document.getElementById('scratchBet').value);
@@ -937,19 +811,18 @@ WEBAPP_HTML = """
             scratchItems.sort(() => Math.random() - 0.5);
             for(let i=0; i<4; i++) {
                 let el = document.getElementById(`sc${i}`);
-                el.innerText = '❓'; el.classList.remove('revealed');
+                el.innerText = '❓'; el.style.background = 'rgba(255,255,255,0.05)';
             }
-            document.getElementById('scratchResult').innerText = 'Сотрите ячейки на карточке';
+            document.getElementById('scratchResult').innerText = 'Сотрите ячейки';
         }
         function revealScratch(idx) {
             let el = document.getElementById(`sc${idx}`);
-            if(el.classList.contains('revealed')) return;
+            if(el.innerText !== '❓') return;
             el.innerText = scratchItems[idx];
-            el.classList.add('revealed');
+            el.style.background = 'rgba(46,213,115,0.15)';
             triggerHaptic('light');
             
-            // Проверка на 2 кристалла
-            let revealedCount = document.querySelectorAll('.scratch-card-item.revealed').length;
+            let revealedCount = Array.from(document.querySelectorAll('#scratchGrid > div')).filter(e => e.innerText !== '❓').length;
             if(revealedCount === 4) {
                 let countGems = scratchItems.filter(x => x === '💎').length;
                 let bet = parseInt(document.getElementById('scratchBet').value);
@@ -959,7 +832,7 @@ WEBAPP_HTML = """
                     res.innerHTML = `<span style="color:var(--accent-green);">🎫 Найдено алмазов! +${win}</span>`;
                     triggerHaptic('success');
                 } else {
-                    res.innerHTML = `<span style="color:var(--accent-red);">🎫 Пустая карточка</span>`;
+                    res.innerHTML = `<span style="color:var(--accent-red);">🎫 Пустая карта</span>`;
                     triggerHaptic('error');
                 }
             }
@@ -977,7 +850,6 @@ router = Router()
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    add_user(message.from_user.id)
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="🎰 Открыть Casino Royale", web_app=WebAppInfo(url=WEBAPP_URL))]
@@ -985,20 +857,18 @@ async def cmd_start(message: Message):
     )
     await message.answer(
         "🎰 **Добро пожаловать в Grand Royale Casino!**\n\n"
-        "Теперь доступно **12 потрясающих игр** с плавной анимацией и тактильной отдачей.\n\n"
-        "Вы можете вызывать казино прямо через Inline-режим в любом чате!",
+        "Доступно **12 игр** с плавной анимацией и облачным сохранением баланса через Supabase.",
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
 
 @router.inline_query()
 async def inline_handler(query: InlineQuery):
-    add_user(query.from_user.id)
     articles = [
         InlineQueryResultArticle(
             id="casino_app",
             title="🎰 Casino Royale (12 Игр)",
-            description="Слоты, Рулетка, Плинко, Колесо Фортуны и многое другое!",
+            description="Облачное казино с плавной анимацией",
             input_message_content=InputTextMessageContent(
                 message_text="🎰 Я открыл игровой зал казино! Присоединяйся к игре."
             ),
@@ -1011,9 +881,8 @@ async def inline_handler(query: InlineQuery):
     ]
     await query.answer(articles, cache_time=1, is_personal=True)
 
-# --- ЗАПУСК БОТА И ВЕБ-СЕРВЕРА ---
+# --- ЗАПУСК БОТА И СЕРВЕРА ---
 async def main():
-    init_db()
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
     dp.include_router(router)
