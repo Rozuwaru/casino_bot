@@ -18,7 +18,7 @@ from aiohttp import web
 TOKEN = "8752641180:AAEFfiJn6ykMK_ymFE4hc6kHKBOzgb9YWK8"
 
 # ЗАМЕНИ НА СВОЙ URL С RENDER (например: https://my-casino-bot.onrender.com/webapp)
-WEBAPP_URL = "https://casino-bot-y2qo.onrender.com"
+WEBAPP_URL = "WEBAPP_URL = "https://casino-bot-y2qo.onrender.com/webapp"
 
 # --- БАЗА ДАННЫХ ---
 def init_db():
